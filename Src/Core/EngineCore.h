@@ -1,14 +1,13 @@
-//
-// Created by Emil Priv on 17/07/2023.
-//
+#pragma once
 
-#ifndef ESD_ENGINE_ENGINECORE_H
-#define ESD_ENGINE_ENGINECORE_H
+#include "../Utils/Settings.h"
+#include "../Simulations/SimulationsHandler.h"
 
-
-class EngineCore {
-
+class EngineCore
+{
+public:
+    static void Run();
+private:
+    EngineCore() = default;
+    ~EngineCore() = default;
 };
-
-
-#endif //ESD_ENGINE_ENGINECORE_H

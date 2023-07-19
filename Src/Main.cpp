@@ -1,3 +1,7 @@
-//
-// Created by Emil Priv on 17/07/2023.
-//
+#include "Core/EngineCore.h"
+
+int main(int, char**)
+{
+    EngineCore::Run();
+    return 0;
+}
