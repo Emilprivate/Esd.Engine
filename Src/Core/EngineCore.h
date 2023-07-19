@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../Utils/Settings.h"
-#include "../Simulations/SimulationsHandler.h"
+#include "../Graphics/Renderer/Renderer.h"
 
 class EngineCore
 {

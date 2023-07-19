@@ -1,5 +1,4 @@
 #include "EngineCore.h"
-#include "../Graphics/Renderer/Renderer.h"
 
 void EngineCore::Run() {
     {
@@ -15,4 +14,3 @@ void EngineCore::Run() {
         renderer.Cleanup();
     }
 }
-

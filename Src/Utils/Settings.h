@@ -1,11 +1,12 @@
-#ifndef ESDENGINE_SETTINGS_H
-#define ESDENGINE_SETTINGS_H
+#pragma once
 
 #include "imgui.h"
 #include <iostream>
 #include <SDL.h>
 
 class Settings {
+private:
+
     struct Window {
         int width = 800;
         int height = 600;
@@ -48,5 +49,3 @@ public:
         return instance;
     }
 };
-
-#endif //ESDENGINE_SETTINGS_H

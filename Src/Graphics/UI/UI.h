@@ -1,5 +1,10 @@
-#include "imgui.h"
+#pragma once
+
+#include <imgui.h>
+
 #include "../../Utils/Settings.h"
+#include "../../Simulations/SimulationsHandler.h"
+#include "Styles.h"
 
 class UI {
 public:
@@ -10,6 +15,6 @@ public:
 
 private:
     bool show_demo_window{}, show_another_window{};
-
     Settings& settings = Settings::GetInstance();
+    SimulationsHandler& simulationsHandler = SimulationsHandler::GetInstance();
 };

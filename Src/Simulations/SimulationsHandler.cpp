@@ -1,28 +1,42 @@
 #include "SimulationsHandler.h"
-#include "Simulations/TestSimulations/BouncingCircle.h"
 
-//TODO: Add steps to the simulation handler
+void SimulationsHandler::SetCurrentSimulation(int index)
+{
+    currentSimulation = simulations[index];
+}
 
 void SimulationsHandler::Initialize()
 {
-    BouncingCircleSimulation::Initialize();
-
+    if (currentSimulation) {
+        currentSimulation->Initialize();
+    }
 }
 
-void SimulationsHandler::Update() {
-    Uint32 currentTicks = SDL_GetTicks();
-    Uint32 elapsedTicks = currentTicks - previousTicks;
-    previousTicks = currentTicks;
-    lag += elapsedTicks;
-
-    while (lag >= MS_PER_UPDATE) {
-        float currentTime = previousTicks / 1000.0f;
-        BouncingCircleSimulation::Update(currentTime);
-        lag -= MS_PER_UPDATE;
+void SimulationsHandler::Update()
+{
+    if (currentSimulation) {
+        currentSimulation->Update();
     }
 }
 
 void SimulationsHandler::Render()
 {
-    BouncingCircleSimulation::Render();
+    if (currentSimulation) {
+        currentSimulation->Render();
+    }
+}
+
+void SimulationsHandler::RenderUI()
+{
+    if (currentSimulation) {
+        currentSimulation->RenderUI();
+    }
+}
+
+std::vector<std::string> SimulationsHandler::GetSimulationNames() {
+    std::vector<std::string> names;
+    for (const auto& simulation : simulations) {
+        names.push_back(simulation->GetName());
+    }
+    return names;
 }

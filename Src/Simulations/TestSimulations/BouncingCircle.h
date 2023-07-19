@@ -1,202 +1,231 @@
+#pragma once
+
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <iostream>
 #include <random>
 #include <vector>
 
-namespace BouncingCircleSimulation {
-    class BouncingCircle {
-    private:
-        float x, y;
-        float radius;
-        float vx, vy;
-        float mass;
-        float windowWidth, windowHeight;
-        float red, green, blue;
-        float gravity;
-        float restitution;
+#include "../../Utils/Settings.h"
+#include "../SimulationBase.h"
 
-        void CheckCollisionWithWindow()
-        {
-            if (x - radius < 0) {
-                vx = std::abs(vx) * restitution;  // scale down the velocity by the restitution
-                x = radius;
-            } else if (x + radius > windowWidth) {
-                vx = -std::abs(vx) * restitution;  // scale down the velocity by the restitution
-                x = windowWidth - radius;
-            }
-            if (y - radius < 0) {
-                vy = std::abs(vy) * restitution;  // scale down the velocity by the restitution
-                y = radius;
-            } else if (y + radius > windowHeight) {
-                vy = -std::abs(vy) * restitution;  // scale down the velocity by the restitution
-                y = windowHeight - radius;
-            }
+class Circle {
+private:
+    float x, y;
+    float radius;
+    float vx, vy;
+    float mass;
+    float windowWidth, windowHeight;
+    float red, green, blue;
+    float gravity;
+    float friction;
+    Settings& settings = Settings::GetInstance();
+
+    void CheckCollisionWithWindow()
+    {
+        if (x - radius < 0) {
+            vx = std::abs(vx) * friction;
+            x = radius;
+        } else if (x + radius > windowWidth) {
+            vx = -std::abs(vx) * friction;
+            x = windowWidth - radius;
         }
-
-    public:
-        BouncingCircle(float x, float y, float radius, float vx, float vy, float mass, float restitution, float gravity, float windowWidth, float windowHeight)
-                : x(x), y(y), radius(radius), vx(vx), vy(vy), mass(mass), restitution(restitution), gravity(gravity), windowWidth(windowWidth), windowHeight(windowHeight)
-        {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-            red = dist(gen);
-            green = dist(gen);
-            blue = dist(gen);
+        if (y - radius < 0) {
+            vy = std::abs(vy) * friction;
+            y = radius;
+        } else if (y + radius > windowHeight) {
+            vy = -std::abs(vy) * friction;
+            y = windowHeight - radius;
         }
+    }
 
-        [[nodiscard]] bool CheckCollisionWithCircle(const BouncingCircle& circle2) const
-        {
-            float dx = x - circle2.x;
-            float dy = y - circle2.y;
-            float distance = sqrt(dx * dx + dy * dy);
+    void CheckCollisionWithCircle(Circle& other)
+    {
+        float dx = other.x - x;
+        float dy = other.y - y;
+        float distance = std::sqrt(dx * dx + dy * dy);
 
-            return distance < radius + circle2.radius;
-        }
-
-        static void SolveCollision(BouncingCircle& circle1, BouncingCircle& circle2)
-        {
-            float dx = circle1.x - circle2.x;
-            float dy = circle1.y - circle2.y;
-            float distance = sqrt(dx * dx + dy * dy);
-
+        if (distance < radius + other.radius) {
+            // Calculate collision response
             float nx = dx / distance;
             float ny = dy / distance;
-
-            // Compute overlap, assuming distance < r1 + r2
-            float overlap = 0.5f * (distance - circle1.radius - circle2.radius);
-
-            // Displace current circle
-            circle1.x -= overlap * nx;
-            circle1.y -= overlap * ny;
-
-            // Displace other circle
-            circle2.x += overlap * nx;
-            circle2.y += overlap * ny;
-
             float tx = -ny;
             float ty = nx;
 
-            float dpTan1 = circle1.vx * tx + circle1.vy * ty;
-            float dpTan2 = circle2.vx * tx + circle2.vy * ty;
+            // Project velocities onto the collision normal and tangent
+            float v1n = nx * vx + ny * vy;
+            float v1t = tx * vx + ty * vy;
+            float v2n = nx * other.vx + ny * other.vy;
+            float v2t = tx * other.vx + ty * other.vy;
 
-            float dpNorm1 = circle1.vx * nx + circle1.vy * ny;
-            float dpNorm2 = circle2.vx * nx + circle2.vy * ny;
+            // Calculate new normal velocities after collision (assuming perfectly elastic collision)
+            float v1n_after = (v1n * (mass - other.mass) + 2 * other.mass * v2n) / (mass + other.mass);
+            float v2n_after = (v2n * (other.mass - mass) + 2 * mass * v1n) / (mass + other.mass);
 
-            float m1 = (dpNorm1 * (circle1.mass - circle2.mass) + 2.0f * circle2.mass * dpNorm2) / (circle1.mass + circle2.mass);
-            float m2 = (dpNorm2 * (circle2.mass - circle1.mass) + 2.0f * circle1.mass * dpNorm1) / (circle1.mass + circle2.mass);
+            // Convert velocities back to x and y components
+            float v1n_after_x = v1n_after * nx;
+            float v1n_after_y = v1n_after * ny;
+            float v1t_after_x = v1t * tx;
+            float v1t_after_y = v1t * ty;
+            float v2n_after_x = v2n_after * nx;
+            float v2n_after_y = v2n_after * ny;
+            float v2t_after_x = v2t * tx;
+            float v2t_after_y = v2t * ty;
 
-            circle1.vx = tx * dpTan1 + nx * m1;
-            circle1.vy = ty * dpTan1 + ny * m1;
-            circle2.vx = tx * dpTan2 + nx * m2;
+            // Update velocities
+            vx = v1n_after_x + v1t_after_x;
+            vy = v1n_after_y + v1t_after_y;
+            other.vx = v2n_after_x + v2t_after_x;
+            other.vy = v2n_after_y + v2t_after_y;
+        }
+    }
 
-            circle1.vx = (tx * dpTan1 + nx * m1) * circle1.restitution;  // scale down the velocity by the restitution
-            circle1.vy = (ty * dpTan1 + ny * m1) * circle1.restitution;  // scale down the velocity by the restitution
-            circle2.vx = (tx * dpTan2 + nx * m2) * circle2.restitution;  // scale down the velocity by the restitution
+public:
+    Circle(float x, float y, float radius, float vx, float vy, float mass, float friction, float gravity, float windowWidth, float windowHeight) :
+           x(x), y(y), radius(radius), vx(vx), vy(vy), mass(mass), friction(friction), gravity(gravity), windowWidth(windowWidth), windowHeight(windowHeight)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+        red = dist(gen);
+        green = dist(gen);
+        blue = dist(gen);
+    }
+
+    void Update(float dt)
+    {
+        x += vx * dt;
+        y += vy * dt;
+        vy += gravity * dt;
+
+        CheckCollisionWithWindow();
+    }
+
+    void Render() const
+    {
+        glBegin(GL_TRIANGLE_FAN);
+
+        glColor3f(red, green, blue);
+
+        glVertex2f(x, y);
+
+        const int num_segments = 100;
+
+        for (int i = 0; i <= num_segments; i++) {
+            float theta = 2.0f * 3.1415926f * float(i) / float(num_segments);
+            float dx = radius * cosf(theta);
+            float dy = radius * sinf(theta);
+            glVertex2f(x + dx, y + dy);
         }
 
-        static void FindCollisions(std::vector<BouncingCircle>& circles)
-        {
-            for (auto it = circles.begin(); it != circles.end(); ++it) {
-                for (auto jt = std::next(it); jt != circles.end(); ++jt) {
-                    if (it->CheckCollisionWithCircle(*jt)) {
-                        SolveCollision(*it, *jt);
-                    }
-                }
-            }
-        }
+        glEnd();
+    }
+};
 
-        // Update function to include effect of gravity on vertical velocity
-        void Update(float dt, std::vector<BouncingCircle>& circles)
-        {
-            x += vx * dt;
-            y += vy * dt;
-            vy += gravity * dt;  // Apply gravitational acceleration to vertical velocity
+class BouncingCircleSimulationManager : public SimulationBase{
+private:
+    bool simulationRunning = false;
 
-            CheckCollisionWithWindow();
-            FindCollisions(circles);
-        }
+    Settings& settings = Settings::GetInstance();
 
-        void Render() const
-        {
-            glBegin(GL_TRIANGLE_FAN);
+    std::vector<Circle> Circles;
+    std::random_device rd {};
+    std::mt19937 gen {rd()};
 
-            glColor3f(red, green, blue);
+    // Local settings for this class
+    int numCircles;
+    float spawnDelay;
+    float accumulatedTime;
+    float distRadiusMin, distRadiusMax;
+    float distSpeedXMin, distSpeedXMax;
+    float distMassMin, distMassMax;
 
-            glVertex2f(x, y);
+    std::uniform_real_distribution<float> distRadius;
+    std::uniform_real_distribution<float> distSpeedX;
+    std::uniform_real_distribution<float> distMass;
 
-            const int num_segments = 100;
+    void SpawnCircle()
+    {
+        float radius = distRadius(gen);
+        float x = settings.GetWindow().width / 2.0f;
+        float y = settings.GetWindow().height / 2.0f;
+        float speedX = distSpeedX(gen);
+        float speedY = 0.0f;
+        float mass = distMass(gen);
+        float gravity = 0.8f;
+        float restitution = 0.95f;
 
-            for (int i = 0; i <= num_segments; i++) {
-                float theta = 2.0f * 3.1415926f * float(i) / float(num_segments);
-                float dx = radius * cosf(theta);
-                float dy = radius * sinf(theta);
-                glVertex2f(x + dx, y + dy);
-            }
+        Circles.emplace_back(x, y, radius, speedX, speedY, mass, restitution, gravity, settings.GetWindow().width, settings.GetWindow().height);
+    }
 
-            glEnd();
-        }
-    };
-
-    struct BouncingCircleSettings {
-        std::vector<BouncingCircle> bouncingCircles;
-        Settings& settings = Settings::GetInstance();
-
-        // New variables for controlling the spawn timing
-        float spawnDelay = 0.5f; // Delay between each spawn in seconds. Modify as needed
-        float lastSpawnTime = 0.0f;
-        int numCirclesToSpawn = 1000; // Total number of circles you want to spawn
-
-        // Function to spawn circles
-        [[maybe_unused]] void spawnCircles(float currentTime) {
-            if (bouncingCircles.size() >= numCirclesToSpawn) {
-                return;
-            }
-
-            if (currentTime - lastSpawnTime >= spawnDelay) {
-                CreateRandomBouncingCircle();
-                lastSpawnTime = currentTime;
-            }
-        }
-
-        // Adjusted to create a single circle
-        void CreateRandomBouncingCircle() {
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> distRadius(25.0f, 50.0f);
-            float radius = 15;
-            float x = settings.GetWindow().width / 2.0f;  // Circle spawns at window center
-            float y = settings.GetWindow().height / 2.0f;  // Circle spawns at window center
-            std::uniform_real_distribution<float> distSpeedX(-5.0f, 5.0f);
-            float speedX = distSpeedX(gen);
-            float speedY = 0.0f;  // No initial vertical speed
-            std::uniform_real_distribution<float> distMass(1.0f, 5.0f);
-            float mass = distMass(gen);
-            float gravity = 0.8f;  // Set gravity (acceleration due to gravity)
-            float restitution = 0.95f;  // Set restitution (energy loss due to collision)
-
-            bouncingCircles.emplace_back(x, y, radius, speedX, speedY, mass, restitution, gravity, settings.GetWindow().width, settings.GetWindow().height);
-        }
-    } bC_settings;
+public:
+    explicit BouncingCircleSimulationManager() : gen(rd()) {}
 
     void Initialize()
     {
+        SpawnCircle();
     }
 
-    void Update(float currentTime) { // Assuming you have a way to get the current time
-        bC_settings.spawnCircles(currentTime);
+    void Update() {
+        if (!simulationRunning) {
+            // If the simulation isn't running, don't do anything
+            return;
+        }
 
-        for (auto& circle : bC_settings.bouncingCircles) {
-            circle.Update(bC_settings.settings.GetSimulations().dt, bC_settings.bouncingCircles);
+        accumulatedTime += settings.GetSimulations().dt;
+
+        if (accumulatedTime >= spawnDelay && Circles.size() < numCircles) {
+            SpawnCircle();
+            accumulatedTime = 0.0f;
+        }
+
+        for (auto& circle : Circles) {
+            circle.Update(settings.GetSimulations().dt);
         }
     }
-
 
     void Render()
     {
-        for (const auto& circle : bC_settings.bouncingCircles) {
+        for (const auto& circle : Circles) {
             circle.Render();
         }
     }
-}
+
+    void Reset() {
+        Circles.clear();  // Clear the existing circles
+        accumulatedTime = 0.0f;  // Reset the accumulated time
+        simulationRunning = false;  // Stop the simulation
+    }
+
+    void RenderUI() override
+    {
+        // Adjust the local settings via UI
+        if (ImGui::SliderInt("Number of Circles", &numCircles, 1, 100)) {}
+
+        if (ImGui::SliderFloat("Spawn Delay", &spawnDelay, 0.1f, 10.0f)) {}
+
+        static float distRadius[2] = {distRadiusMin, distRadiusMax};
+        if (ImGui::SliderFloat2("Radius Range", distRadius, 10.0f, 100.0f)) {
+            distRadiusMin = distRadius[0];
+            distRadiusMax = distRadius[1];
+            this->distRadius = std::uniform_real_distribution<float>{distRadiusMin, distRadiusMax};
+        }
+
+        if (ImGui::Button("Start Simulation")) {
+            simulationRunning = true;
+        }
+
+        if (ImGui::Button("Stop Simulation")) {
+            simulationRunning = false;
+        }
+
+        if (ImGui::Button("Reset Simulation")) {
+            Reset();
+        }
+    }
+
+    std::string GetName() override {
+        return "Bouncing Circle";
+    }
+};
+

@@ -1,18 +1,51 @@
 #pragma once
 
+#include "Simulations/TestSimulations/BouncingCircle.h"
 #include "../Utils/Settings.h"
-//TODO: Add steps to the simulation handler
+#include "SimulationBase.h"
+
 class SimulationsHandler {
 private:
-    Uint32 previousTicks = SDL_GetTicks();
-    Uint32 lag = 0;
-    const Uint32 MS_PER_UPDATE = 1000 / 60;
+    Settings& settings = Settings::GetInstance();
+    std::vector<SimulationBase*> simulations;
+    SimulationBase* currentSimulation = nullptr;  // Pointer to the current simulation
+
+    SimulationsHandler() {
+        // Instantiate the simulation objects and add them to the simulations vector
+        AddSimulation(new BouncingCircleSimulationManager());
+        // Add other simulations here...
+    }
+
+    ~SimulationsHandler() {
+        // Don't forget to deallocate the simulations to avoid memory leaks
+        for (auto simulation : simulations) {
+            delete simulation;
+        }
+    }
 
 public:
-    SimulationsHandler() = default;
-    ~SimulationsHandler() = default;
+    // Deleted functions
+    SimulationsHandler(const SimulationsHandler&) = delete;
+    SimulationsHandler& operator=(const SimulationsHandler&) = delete;
 
+    // Static method for getting the instance
+    static SimulationsHandler& GetInstance() {
+        static SimulationsHandler instance;  // Guaranteed to be destroyed, instantiated on first use.
+        return instance;
+    }
+
+    void AddSimulation(SimulationBase* simulation) {
+        simulations.push_back(simulation);
+        if (simulations.size() == 1) {
+            SetCurrentSimulation(0);
+        }
+    }
+
+    void SetCurrentSimulation(int index);  // New method for setting the current simulation
     void Initialize();
     void Render();
     void Update();
+    void RenderUI();  // New method for rendering the UI of the current simulation
+
+    std::vector<std::string> GetSimulationNames();
 };

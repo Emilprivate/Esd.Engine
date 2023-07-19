@@ -6,9 +6,9 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_opengl2.h>
 
+#include "../../Utils/Settings.h"
 #include "../UI/UI.h"
 #include "../../Simulations/SimulationsHandler.h"
-#include "../../Utils/Settings.h"
 
 class Renderer
 {
@@ -28,6 +28,6 @@ private:
     bool isInitialized;
 
     Settings& settings = Settings::GetInstance();
-    SimulationsHandler simulationsHandler;
+    SimulationsHandler& simulationsHandler = SimulationsHandler::GetInstance();
     UI ui;
 };
