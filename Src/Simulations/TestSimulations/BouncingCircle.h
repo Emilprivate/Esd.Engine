@@ -92,11 +92,11 @@ public:
         blue = dist(gen);
     }
 
-    void Update(float dt)
+    void Update()
     {
-        x += vx * dt;
-        y += vy * dt;
-        vy += gravity * dt;
+        x += vx;
+        y += vy;
+        vy += gravity;
 
         CheckCollisionWithWindow();
     }
@@ -161,12 +161,13 @@ private:
 public:
     explicit BouncingCircleSimulationManager() : gen(rd()) {}
 
-    void Initialize()
+    void Initialize() override
     {
         SpawnCircle();
     }
 
-    void Update() {
+    void Update() override
+    {
         if (!simulationRunning) {
             // If the simulation isn't running, don't do anything
             return;
@@ -179,12 +180,17 @@ public:
             accumulatedTime = 0.0f;
         }
 
-        for (auto& circle : Circles) {
-            circle.Update(settings.GetSimulations().dt);
+        // Here is where we implement the sub-steps.
+        // The simulation step will be run as many times as specified by subSteps,
+        // but with a smaller time delta.
+        for (int i = 0; i < settings.GetSimulations().subSteps; ++i) {
+            for (auto& circle : Circles) {
+                circle.Update();
+            }
         }
     }
 
-    void Render()
+    void Render() override
     {
         for (const auto& circle : Circles) {
             circle.Render();
@@ -200,7 +206,7 @@ public:
     void RenderUI() override
     {
         // Adjust the local settings via UI
-        if (ImGui::SliderInt("Number of Circles", &numCircles, 1, 100)) {}
+        if (ImGui::SliderInt("Number of Circles", &numCircles, 1, 1000)) {}
 
         if (ImGui::SliderFloat("Spawn Delay", &spawnDelay, 0.1f, 10.0f)) {}
 
@@ -210,6 +216,8 @@ public:
             distRadiusMax = distRadius[1];
             this->distRadius = std::uniform_real_distribution<float>{distRadiusMin, distRadiusMax};
         }
+
+        if (ImGui::SliderInt("Sub-Steps", &settings.GetSimulations().subSteps, 1, 10)) {}
 
         if (ImGui::Button("Start Simulation")) {
             simulationRunning = true;

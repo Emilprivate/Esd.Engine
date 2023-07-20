@@ -35,7 +35,9 @@ private:
     } renderer;
 
     struct Simulations {
-        float dt = 1.0f / 60.0f;
+        int subSteps = 1;
+        float fps = 60.0f;
+        float dt = 1.0f / fps;
     } simulations;
 
 public:

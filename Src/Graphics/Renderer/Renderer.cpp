@@ -39,7 +39,7 @@ void Renderer::Initialize()
     window = SDL_CreateWindow(settings.GetWindow().title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.GetWindow().width, settings.GetWindow().height, window_flags);
     gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
-    SDL_GL_SetSwapInterval(0); // Enable vsync
+    SDL_GL_SetSwapInterval(1); // Enable vsync
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -106,11 +106,6 @@ void Renderer::Render()
         {
             if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
             {
-                //TODO: Fix this, for some reason doesn't update the window size in the settings
-                //settings.GetWindow().width = event.window.data1;
-                //settings.GetWindow().height = event.window.data2;
-                //perhaps because this event isn't triggered at all?
-
                 //Set viewport for the OpenGL rendering
                 settings.GetWindow().SetSize(event.window.data1, event.window.data2);
 
