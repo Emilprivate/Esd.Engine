@@ -2,7 +2,7 @@
 
 void EngineCore::Run() {
     Renderer renderer = Renderer();
-
+    Settings& settings = Settings::GetInstance();
     renderer.Initialize();
 
     while (!renderer.ShouldClose())
@@ -14,8 +14,8 @@ void EngineCore::Run() {
         Uint32 frameEnd = SDL_GetTicks(); // End of frame
         Uint32 frameTime = frameEnd - frameStart; // Frame time
 
-        if (frameTime < 1000 / 60) { // Delay to achieve the desired frame rate (60 fps)
-            SDL_Delay((1000 / 60) - frameTime);
+        if (frameTime < 1000 / settings.GetSimulations().fps) { // Delay to achieve the desired frame rate (60 fps)
+            SDL_Delay((1000 / settings.GetSimulations().fps) - frameTime);
         }
     }
 

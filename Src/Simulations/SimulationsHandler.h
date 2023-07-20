@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Simulations/TestSimulations/BouncingCircle.h"
+#include "Simulations/TestSimulations/Circle.h"
+#include "Simulations/TestSimulations/Verlet.h"
+
 #include "../Utils/Settings.h"
 #include "SimulationBase.h"
 
@@ -12,7 +14,9 @@ private:
 
     SimulationsHandler() {
         // Instantiate the simulation objects and add them to the simulations vector
-        AddSimulation(new BouncingCircleSimulationManager());
+        AddSimulation(new VerletSimulationManager());
+        AddSimulation(new CircleSimulationManager());
+
         // Add other simulations here...
     }
 

@@ -12,8 +12,10 @@
 class Circle {
 private:
     float x, y;
+    float prevX, prevY;
     float radius;
     float vx, vy;
+    float accelerationX, accelerationY;
     float mass;
     float windowWidth, windowHeight;
     float red, green, blue;
@@ -39,13 +41,68 @@ private:
         }
     }
 
+public:
+    Circle(float x, float y, float radius, float vx, float vy, float mass, float friction, float gravity, float windowWidth, float windowHeight) :
+            x(x), y(y), radius(radius), vx(vx), vy(vy), mass(mass), friction(friction), gravity(gravity), windowWidth(windowWidth), windowHeight(windowHeight)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
+        // Get current time with SDL
+        Uint32 ticks = SDL_GetTicks();
+
+        // Use a sine wave to generate RGB values
+        red = std::pow(std::sin(ticks), 2.0f);
+        green = std::pow(std::sin(ticks + 0.33f * 2.0f * 3.14159265359f), 2.0f);
+        blue = std::pow(std::sin(ticks + 0.66f * 2.0f * 3.14159265359f), 2.0f);
+    }
+
+    void Update()
+    {
+        const float MIN_VELOCITY = 0.01f;  // Minimum velocity, adjust as needed
+
+        vy += gravity; // Apply gravity
+        x += vx; // Update position
+        y += vy;
+        vx *= friction; // Apply friction
+        vy *= friction;
+
+        // Check if the velocity is below the threshold, and if so, set it to zero
+        if (std::abs(vx) < MIN_VELOCITY) vx = 0.0f;
+        if (std::abs(vy) < MIN_VELOCITY) vy = 0.0f;
+
+        CheckCollisionWithWindow();
+    }
+
+    void Render() const
+    {
+        glBegin(GL_TRIANGLE_FAN);
+
+        glColor3f(red, green, blue);
+
+        glVertex2f(x, y);
+
+        const int num_segments = 500;
+
+        for (int i = 0; i <= num_segments; i++) {
+            float theta = 2.0f * 3.1415926f * float(i) / float(num_segments);
+            float dx = radius * cosf(theta);
+            float dy = radius * sinf(theta);
+            glVertex2f(x + dx, y + dy);
+        }
+
+        glEnd();
+    }
+
     void CheckCollisionWithCircle(Circle& other)
     {
         float dx = other.x - x;
         float dy = other.y - y;
         float distance = std::sqrt(dx * dx + dy * dy);
+        float overlap = radius + other.radius - distance;
 
-        if (distance < radius + other.radius) {
+        if (overlap > 0) {
             // Calculate collision response
             float nx = dx / distance;
             float ny = dy / distance;
@@ -77,52 +134,20 @@ private:
             vy = v1n_after_y + v1t_after_y;
             other.vx = v2n_after_x + v2t_after_x;
             other.vy = v2n_after_y + v2t_after_y;
+
+            // Positional correction to avoid overlap
+            float correction = overlap / (mass + other.mass);
+            correction += 0.01f;  // add a small constant to ensure minimum movement
+            x -= nx * correction * other.mass;
+            y -= ny * correction * other.mass;
+            other.x += nx * correction * mass;
+            other.y += ny * correction * mass;
         }
     }
 
-public:
-    Circle(float x, float y, float radius, float vx, float vy, float mass, float friction, float gravity, float windowWidth, float windowHeight) :
-           x(x), y(y), radius(radius), vx(vx), vy(vy), mass(mass), friction(friction), gravity(gravity), windowWidth(windowWidth), windowHeight(windowHeight)
-    {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-        red = dist(gen);
-        green = dist(gen);
-        blue = dist(gen);
-    }
-
-    void Update()
-    {
-        x += vx;
-        y += vy;
-        vy += gravity;
-
-        CheckCollisionWithWindow();
-    }
-
-    void Render() const
-    {
-        glBegin(GL_TRIANGLE_FAN);
-
-        glColor3f(red, green, blue);
-
-        glVertex2f(x, y);
-
-        const int num_segments = 100;
-
-        for (int i = 0; i <= num_segments; i++) {
-            float theta = 2.0f * 3.1415926f * float(i) / float(num_segments);
-            float dx = radius * cosf(theta);
-            float dy = radius * sinf(theta);
-            glVertex2f(x + dx, y + dy);
-        }
-
-        glEnd();
-    }
 };
 
-class BouncingCircleSimulationManager : public SimulationBase{
+class CircleSimulationManager : public SimulationBase{
 private:
     bool simulationRunning = false;
 
@@ -147,31 +172,28 @@ private:
     void SpawnCircle()
     {
         float radius = distRadius(gen);
-        float x = settings.GetWindow().width / 2.0f;
-        float y = settings.GetWindow().height / 2.0f;
+        float x = radius;
+        float y = radius;
         float speedX = distSpeedX(gen);
         float speedY = 0.0f;
         float mass = distMass(gen);
         float gravity = 0.8f;
-        float restitution = 0.95f;
+        float friction = 0.98f;
 
-        Circles.emplace_back(x, y, radius, speedX, speedY, mass, restitution, gravity, settings.GetWindow().width, settings.GetWindow().height);
+        Circles.emplace_back(x, y, radius, speedX, speedY, mass, friction, gravity, settings.GetWindow().width, settings.GetWindow().height);
     }
 
 public:
-    explicit BouncingCircleSimulationManager() : gen(rd()) {}
+    explicit CircleSimulationManager() : gen(rd()) {}
 
     void Initialize() override
     {
-        SpawnCircle();
     }
 
     void Update() override
     {
-        if (!simulationRunning) {
-            // If the simulation isn't running, don't do anything
+        if (!simulationRunning)
             return;
-        }
 
         accumulatedTime += settings.GetSimulations().dt;
 
@@ -180,12 +202,16 @@ public:
             accumulatedTime = 0.0f;
         }
 
-        // Here is where we implement the sub-steps.
-        // The simulation step will be run as many times as specified by subSteps,
-        // but with a smaller time delta.
         for (int i = 0; i < settings.GetSimulations().subSteps; ++i) {
             for (auto& circle : Circles) {
                 circle.Update();
+            }
+
+            // Checking collision between each pair of circles
+            for (size_t j = 0; j < Circles.size(); ++j) {
+                for (size_t k = j + 1; k < Circles.size(); ++k) {
+                    Circles[j].CheckCollisionWithCircle(Circles[k]);
+                }
             }
         }
     }
@@ -208,16 +234,30 @@ public:
         // Adjust the local settings via UI
         if (ImGui::SliderInt("Number of Circles", &numCircles, 1, 1000)) {}
 
-        if (ImGui::SliderFloat("Spawn Delay", &spawnDelay, 0.1f, 10.0f)) {}
+        if (ImGui::SliderFloat("Spawn Delay", &spawnDelay, 0.0f, 10.0f)) {}
 
         static float distRadius[2] = {distRadiusMin, distRadiusMax};
-        if (ImGui::SliderFloat2("Radius Range", distRadius, 10.0f, 100.0f)) {
+        if (ImGui::SliderFloat2("Radius Range", distRadius, 5.0f, 100.0f)) {
             distRadiusMin = distRadius[0];
             distRadiusMax = distRadius[1];
             this->distRadius = std::uniform_real_distribution<float>{distRadiusMin, distRadiusMax};
         }
 
         if (ImGui::SliderInt("Sub-Steps", &settings.GetSimulations().subSteps, 1, 10)) {}
+
+        static float distSpeedX[2] = {distSpeedXMin, distSpeedXMax};
+        if (ImGui::SliderFloat2("Speed Range", distSpeedX, 0.0f, 100.0f)) {
+            distSpeedXMin = distSpeedX[0];
+            distSpeedXMax = distSpeedX[1];
+            this->distSpeedX = std::uniform_real_distribution<float>{distSpeedXMin, distSpeedXMax};
+        }
+
+        static float distMass[2] = {distMassMin, distMassMax};
+        if (ImGui::SliderFloat2("Mass Range", distMass, 0.1f, 10.0f)) {
+            distMassMin = distMass[0];
+            distMassMax = distMass[1];
+            this->distMass = std::uniform_real_distribution<float>{distMassMin, distMassMax};
+        }
 
         if (ImGui::Button("Start Simulation")) {
             simulationRunning = true;
@@ -233,7 +273,7 @@ public:
     }
 
     std::string GetName() override {
-        return "Bouncing Circle";
+        return "Circle Simulation";
     }
 };
 

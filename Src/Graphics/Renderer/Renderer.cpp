@@ -40,6 +40,7 @@ void Renderer::Initialize()
     gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
+    SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ); // Enable linear filtering
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

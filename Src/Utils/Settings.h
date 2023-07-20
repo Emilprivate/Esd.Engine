@@ -8,8 +8,8 @@ class Settings {
 private:
 
     struct Window {
-        int width = 800;
-        int height = 600;
+        int width = 1200;
+        int height = 800;
         const char* title = "Esd.Engine";
 
         void SetSize(int newWidth, int newHeight)
@@ -37,7 +37,7 @@ private:
     struct Simulations {
         int subSteps = 1;
         float fps = 60.0f;
-        float dt = 1.0f / fps;
+        float dt = (1.0f / fps);
     } simulations;
 
 public:
