@@ -1,56 +1,64 @@
 #include "UI.h"
 
-void UI::Render() {
-    // Starting with the Demo window
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
-
-    ImGui::Begin("Esd.Engine Menu", reinterpret_cast<bool *>(true), ImGuiWindowFlags_NoScrollbar);
-
-    // Reusing the Settings object
-    auto& renderer = settings.GetRenderer();
-
-    // For Checkboxes
-    ImGui::Checkbox("Demo Window", &show_demo_window);
-
-    // Theming
-    Styles::DefaultStyle();
-
-    // Background Color
-    static ImVec4 color = renderer.GetClearColor();
-    if(ImGui::ColorEdit3("Background Color", (float*)&color)) {
-        renderer.SetClearColor(color.x, color.y, color.z, color.w);
+void UI::MainMenuBar()
+{
+    ImGui::BeginMainMenuBar();
+    if (ImGui::BeginMenu("Engine"))
+    {
+        if (ImGui::MenuItem("Exit"))
+        {
+            SDL_Event quitEvent;
+            quitEvent.type = SDL_QUIT;
+            SDL_PushEvent(&quitEvent);
+        }
+        ImGui::EndMenu();
     }
 
-    // Simulation Dropdown
-    static int selectedSimulation = 0;
-    auto simulationNames = simulationsHandler.GetSimulationNames();
-
-    std::vector<const char*> cstrs;
-    std::transform(simulationNames.begin(), simulationNames.end(), std::back_inserter(cstrs),
-                   [](const std::string& str) {
-                       return str.c_str();
-                   });
-
-    if (ImGui::Combo("Simulation", &selectedSimulation, cstrs.data(), cstrs.size())) {
-        simulationsHandler.SetCurrentSimulation(selectedSimulation);
+    if (ImGui::BeginMenu("View"))
+    {
+        ImGui::MenuItem("Esd.Engine Menu", nullptr, &settings.GetUI().ShowEngineMenu());
+        ImGui::EndMenu();
     }
 
-    // Sliders
-    auto& simSettings = settings.GetSimulations();
-    ImGui::SliderInt("Substeps", &simSettings.subSteps, 1, 10);
-    ImGui::SliderFloat("FPS", &simSettings.fps, 1.0f, 120.0f);
+    settings.RenderUI();
+    ImGui::EndMainMenuBar();
+}
 
-    // FPS info
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+void UI::Render()
+{
+    MainMenuBar();
 
-    // Child Window
-    ImGui::BeginChild("Simulation Settings", ImVec2(0, 0), true);
-    simulationsHandler.RenderUI();
-    ImGui::EndChild();
+    if (settings.GetUI().ShowEngineMenu()) {
+        ImGui::Begin("Esd.Engine Menu", &settings.GetUI().ShowEngineMenu(), ImGuiWindowFlags_NoScrollbar);
 
+        if (settings.GetUI().ShowDemoWindow()) {
+            ImGui::ShowDemoWindow(&settings.GetUI().ShowDemoWindow());
+        }
 
+        static int selectedSimulation = 0;
+        auto simulationNames = simulationsHandler.GetSimulationNames();
 
-    // Closing the window
-    ImGui::End();
+        std::vector<const char*> cstrs;
+        std::transform(simulationNames.begin(), simulationNames.end(), std::back_inserter(cstrs),
+                       [](const std::string& str) {
+                           return str.c_str();
+                       });
+
+        if (ImGui::Combo("Simulation", &selectedSimulation, cstrs.data(), cstrs.size()))
+        {
+            simulationsHandler.SetCurrentSimulation(selectedSimulation);
+        }
+
+        auto& simSettings = settings.GetSimulations();
+        ImGui::SliderInt("Substeps", &simSettings.subSteps, 1, 10);
+        ImGui::SliderFloat("FPS", &simSettings.fps, 1.0f, 120.0f);
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        ImGui::BeginChild("Simulation Settings", ImVec2(0, 0), true);
+        simulationsHandler.RenderUI();
+        ImGui::EndChild();
+
+        ImGui::End();
+    }
 }

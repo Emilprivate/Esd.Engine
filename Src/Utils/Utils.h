@@ -151,7 +151,6 @@ protected:
     {}
 };
 
-
 template<typename T>
 class RealNumberGenerator : public NumberGenerator
 {

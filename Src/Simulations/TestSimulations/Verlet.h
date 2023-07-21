@@ -28,14 +28,11 @@ struct VerletObject
 
     void update(float dt)
     {
-        // Compute how much we moved
         const Vector2<float> displacement = position - position_last;
 
-        // Update position
         position_last = position;
         position      = position + displacement + acceleration * (dt * dt);
 
-        // Reset acceleration
         acceleration = Vector2<float>{};
     }
 
@@ -129,7 +126,8 @@ public:
     [[nodiscard]]
     float getStepDt() const
     {
-        if (m_sub_steps != 0) {
+        if (m_sub_steps != 0)
+        {
             return m_frame_dt / static_cast<float>(m_sub_steps);
         } else {
             std::cerr << "Warning: Division by zero detected at [getStepDt]. Returning default value 0." << std::endl;
@@ -153,7 +151,7 @@ public:
         m_window_constraint = shouldUseWindow;
     }
 
-    bool                      m_window_constraint  = false;
+    bool                      m_window_constraint  = true;
 private:
     Settings&                 m_settings           = Settings::GetInstance();
 
@@ -167,7 +165,8 @@ private:
 
     void applyGravity()
     {
-        for (auto& obj : m_objects) {
+        for (auto& obj : m_objects)
+        {
             obj.accelerate(m_gravity);
         }
     }
@@ -176,17 +175,20 @@ private:
     {
         const float    response_coef = 0.75f;
         const uint64_t objects_count = m_objects.size();
-        // Iterate on all objects
-        for (uint64_t i{0}; i < objects_count; ++i) {
+
+        for (uint64_t i{0}; i < objects_count; ++i)
+        {
             VerletObject& object_1 = m_objects[i];
-            // Iterate on object involved in new collision pairs
-            for (uint64_t k{i + 1}; k < objects_count; ++k) {
+
+            for (uint64_t k{i + 1}; k < objects_count; ++k)
+            {
                 VerletObject&      object_2 = m_objects[k];
                 const Vector2<float> v        = object_1.position - object_2.position;
                 const float        dist2    = v.x * v.x + v.y * v.y;
                 const float        min_dist = object_1.radius + object_2.radius;
-                // Check overlapping
-                if (dist2 < min_dist * min_dist) {
+
+                if (dist2 < min_dist * min_dist)
+                {
                     const float        dist  = sqrt(dist2);
                     if (dist != 0.0f)
                     {
@@ -194,7 +196,6 @@ private:
                         const float mass_ratio_1 = object_1.radius / (object_1.radius + object_2.radius);
                         const float mass_ratio_2 = object_2.radius / (object_1.radius + object_2.radius);
                         const float delta        = 0.5f * response_coef * (dist - min_dist);
-                        // Update positions
                         object_1.position -= n * (mass_ratio_2 * delta);
                         object_2.position += n * (mass_ratio_1 * delta);
                     } else {
@@ -208,7 +209,6 @@ private:
     void applyConstraint()
     {
         if(m_window_constraint) {
-            // Constraint to window size
             const auto& windowSize = m_settings.GetWindow();
             for (auto& obj : m_objects) {
                 if (obj.position.x - obj.radius < 0) obj.position.x = obj.radius;
@@ -217,7 +217,6 @@ private:
                 if (obj.position.y + obj.radius > windowSize.height) obj.position.y = windowSize.height - obj.radius;
             }
         } else {
-            // Original circle constraint
             for (auto& obj : m_objects) {
                 const Vector2<float> v    = m_constraint_center - obj.position;
                 const float        dist = sqrt(v.x * v.x + v.y * v.y);
@@ -289,7 +288,7 @@ public:
 
         // Spawn objects
         Uint32 current_time = SDL_GetTicks();
-        float elapsed_time = (current_time - last_spawn_time) / 1000.0f; // Convert milliseconds to seconds
+        float elapsed_time = (current_time - last_spawn_time) / 1000.0f;
 
         if (elapsed_time >= object_spawn_delay && solver.getObjectsCount() < max_objects_count) {
             std::cout << "Spawn object" << std::endl;
@@ -300,10 +299,9 @@ public:
             solver.setObjectVelocity(object, object_spawn_speed * Vector2<float>{cos(angle), sin(angle)});
             object.color = getRainbow(t);
 
-            last_spawn_time = current_time; // Update last_spawn_time to current_time
+            last_spawn_time = current_time;
         }
 
-        //std::cout << "VerletSimulationManager::Update()" << std::endl;
         solver.update();
     }
 
@@ -312,14 +310,12 @@ public:
     {
         if (!solver.m_window_constraint)
         {
-            // Draw the constraint circle
             Vector2<float> constraint_center = solver.getConstraintCenter();
             float constraint_radius = solver.getConstraintRadius();
-            Color constraint_color = {0.1f, 0.1f, 0.1f}; // grey color
+            Color constraint_color = {0.1f, 0.1f, 0.1f};
             DrawCircle(constraint_center.x, constraint_center.y, constraint_radius, constraint_color);
         }
 
-        //std::cout << "VerletSimulationManager::Render()" << std::endl;
         for (const auto& object : solver.getObjects()) {
             DrawCircle(object.position.x, object.position.y, object.radius, object.color);
         }
@@ -327,7 +323,6 @@ public:
 
     void RenderUI() override
     {
-        //std::cout << "VerletSimulationManager::RenderUI()" << std::endl;
         ImGui::Text("Number of objects: %d", solver.getObjectsCount());
         ImGui::Text("Simulation time: %.3f", solver.getTime());
         ImGui::Text("Simulation update rate: %.3f", solver.getStepDt());

@@ -14,7 +14,8 @@ public:
     void Render();
 
 private:
-    bool show_demo_window{}, show_another_window{};
     Settings& settings = Settings::GetInstance();
     SimulationsHandler& simulationsHandler = SimulationsHandler::GetInstance();
+
+    void MainMenuBar();
 };
