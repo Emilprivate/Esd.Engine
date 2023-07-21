@@ -243,8 +243,6 @@ public:
             this->distRadius = std::uniform_real_distribution<float>{distRadiusMin, distRadiusMax};
         }
 
-        if (ImGui::SliderInt("Sub-Steps", &settings.GetSimulations().subSteps, 1, 10)) {}
-
         static float distSpeedX[2] = {distSpeedXMin, distSpeedXMax};
         if (ImGui::SliderFloat2("Speed Range", distSpeedX, 0.0f, 100.0f)) {
             distSpeedXMin = distSpeedX[0];

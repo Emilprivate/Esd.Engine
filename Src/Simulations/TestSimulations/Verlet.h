@@ -81,7 +81,7 @@ public:
         const float step_dt = getStepDt();
         for (uint32_t i{m_sub_steps}; i--;) {
             applyGravity();
-            checkCollisions(step_dt);
+            checkCollisions();
             applyConstraint();
             updateObjects(step_dt);
         }
@@ -172,7 +172,7 @@ private:
         }
     }
 
-    void checkCollisions(float dt)
+    void checkCollisions()
     {
         const float    response_coef = 0.75f;
         const uint64_t objects_count = m_objects.size();
@@ -284,7 +284,7 @@ public:
         const float object_min_radius = 5.0f;
         const float object_max_radius = 20.0f;
         const Vector2<float> object_spawn_position = {settings.GetWindow().width / 2.0f, object_max_radius};
-        const uint32_t max_objects_count = 1000;
+        const uint32_t max_objects_count = 500;
         const float max_angle = 1.0f;
 
         // Spawn objects
