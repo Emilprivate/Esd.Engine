@@ -13,11 +13,25 @@ private:
         int height = 800;
         const char* title = "Esd.Engine";
 
+        SDL_Window* window;
+        SDL_GLContext gl_context;
+
         void SetSize(int newWidth, int newHeight)
         {
             width = newWidth;
             height = newHeight;
         }
+
+        void SetSDLWindow(SDL_Window* newWindow)
+        {
+            window = newWindow;
+        }
+
+        void SetGLContext(SDL_GLContext newContext)
+        {
+            gl_context = newContext;
+        }
+
     } window;
 
     struct Renderer {
@@ -39,6 +53,10 @@ private:
         int subSteps = 8;
         float fps = 60.0f;
         float dt = (1.0f / fps);
+
+        struct Verlet {
+
+        };
     } simulations;
 
     struct UI {

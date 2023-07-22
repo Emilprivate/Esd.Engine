@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Simulations/TestSimulations/Verlet.h"
+#include "Simulations/TestSimulations/Editor.h"
 
 #include "../Utils/Settings.h"
 #include "SimulationBase.h"
@@ -13,6 +14,7 @@ private:
 
     SimulationsHandler() {
         AddSimulation(new VerletSimulationManager());
+        AddSimulation(new EditorSimulationManager());
     }
 
     ~SimulationsHandler() {

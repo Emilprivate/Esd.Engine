@@ -23,8 +23,6 @@ public:
     bool ShouldClose();
 
 private:
-    SDL_Window* window;
-    SDL_GLContext gl_context;
     bool isInitialized;
 
     Settings& settings = Settings::GetInstance();

@@ -39,6 +39,21 @@ private:
         // Fill this according to the requirements of your new simulation
     }
 
+    /* Example on how to draw an object
+    void DrawCircle(float x, float y, float radius, Color color)
+    {
+        const float DEG2RAD = 3.14159f / 180;
+        glBegin(GL_TRIANGLE_FAN);
+        glColor3f(color.red, color.green, color.blue);
+        glVertex2f(x, y);
+        for (int i = 0; i <= 360; i++) {
+            float degInRad = i * DEG2RAD;
+            glVertex2f(x + cos(degInRad) * radius, y + sin(degInRad) * radius);
+        }
+        glEnd();
+    }
+    */
+
 public:
     // Default constructor
     SimulationManager() {}

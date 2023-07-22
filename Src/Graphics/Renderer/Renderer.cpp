@@ -1,8 +1,6 @@
 #include "Renderer.h"
 
 Renderer::Renderer() :
-        window(nullptr),
-        gl_context(nullptr),
         isInitialized(false){}
 
 Renderer::~Renderer()
@@ -33,8 +31,12 @@ void Renderer::Initialize()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     auto window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    window = SDL_CreateWindow(settings.GetWindow().title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.GetWindow().width, settings.GetWindow().height, window_flags);
-    gl_context = SDL_GL_CreateContext(window);
+    auto window = SDL_CreateWindow(settings.GetWindow().title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.GetWindow().width, settings.GetWindow().height, window_flags);
+    settings.GetWindow().SetSDLWindow(window);
+
+    auto gl_context = SDL_GL_CreateContext(window);
+    settings.GetWindow().SetGLContext(gl_context);
+
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1);
     SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
@@ -63,7 +65,7 @@ bool Renderer::ShouldClose()
         {
             return true;
         }
-        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(settings.GetWindow().window))
         {
             return true;
         }
@@ -100,7 +102,7 @@ void Renderer::Render()
 
                 int realWidth, realHeight;
 
-                SDL_GL_GetDrawableSize(window, &realWidth, &realHeight);
+                SDL_GL_GetDrawableSize(settings.GetWindow().window, &realWidth, &realHeight);
 
                 glViewport(0, 0, realWidth, realHeight);
             }
@@ -109,11 +111,11 @@ void Renderer::Render()
     }
 
     ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplSDL2_NewFrame(window);
+    ImGui_ImplSDL2_NewFrame(settings.GetWindow().window);
     ImGui::NewFrame();
 
     int realWidth, realHeight;
-    SDL_GL_GetDrawableSize(window, &realWidth, &realHeight);
+    SDL_GL_GetDrawableSize(settings.GetWindow().window, &realWidth, &realHeight);
     settings.GetWindow().SetSize(realWidth, realHeight);
 
     glViewport(0, 0, settings.GetWindow().width, settings.GetWindow().height);
@@ -132,7 +134,7 @@ void Renderer::Render()
     ImGui::Render();
     ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(settings.GetWindow().window);
 }
 
 void Renderer::Cleanup()
@@ -144,8 +146,8 @@ void Renderer::Cleanup()
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
-    SDL_GL_DeleteContext(gl_context);
-    SDL_DestroyWindow(window);
+    SDL_GL_DeleteContext(settings.GetWindow().gl_context);
+    SDL_DestroyWindow(settings.GetWindow().window);
     SDL_Quit();
 
     isInitialized = false;

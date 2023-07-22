@@ -53,9 +53,15 @@ void UI::Render()
         ImGui::SliderInt("Substeps", &simSettings.subSteps, 1, 10);
         ImGui::SliderFloat("FPS", &simSettings.fps, 1.0f, 120.0f);
 
+        ImGui::Separator();
+
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+        ImGui::Separator();
+
         ImGui::BeginChild("Simulation Settings", ImVec2(0, 0), true);
+        ImGui::Text("Simulation Settings");
+        ImGui::Separator();
         simulationsHandler.RenderUI();
         ImGui::EndChild();
 

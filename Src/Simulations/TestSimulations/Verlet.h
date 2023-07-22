@@ -323,22 +323,28 @@ public:
 
     void RenderUI() override
     {
-        ImGui::Text("Number of objects: %d", solver.getObjectsCount());
-        ImGui::Text("Simulation time: %.3f", solver.getTime());
-        ImGui::Text("Simulation update rate: %.3f", solver.getStepDt());
-        ImGui::Text("Simulation sub steps: %d", solver.getObjectsCount());
+        if (ImGui::Button("Start Simulation")) {
+            simulationRunning = true;
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Stop Simulation")) {
+            simulationRunning = false;
+        }
 
         if (ImGui::Checkbox("Use Window As Constraint", &solver.m_window_constraint)) {
             solver.useWindowAsConstraint(solver.m_window_constraint);
         }
 
-        if (ImGui::Button("Start Simulation")) {
-            simulationRunning = true;
-        }
+        ImGui::Separator();
 
-        if (ImGui::Button("Stop Simulation")) {
-            simulationRunning = false;
-        }
+        ImGui::BeginGroup();
+        ImGui::Text("Number of objects: %d", solver.getObjectsCount());
+        ImGui::Text("Simulation time: %.3f", solver.getTime());
+        ImGui::Text("Simulation update rate: %.3f", solver.getStepDt());
+        ImGui::Text("Simulation sub steps: %d", solver.getObjectsCount());
+        ImGui::EndGroup();
     }
 
     std::string GetName() override {

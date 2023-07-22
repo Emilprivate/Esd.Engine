@@ -11,6 +11,30 @@ public:
     // Constructor
     Vector2(T x = 0, T y = 0) : x(x), y(y) {}
 
+    // Dot product
+    T Dot(const Vector2<T>& other) const {
+        return x * other.x + y * other.y;
+    }
+
+    // Length squared (magnitude squared)
+    T LengthSquared() const {
+        return x * x + y * y;
+    }
+
+    Vector2<float> Normalized() const {
+        float length = Length();
+        if (length != 0.0f) {
+            return Vector2<float>(x / length, y / length);
+        } else {
+            return Vector2<float>(0.0f, 0.0f);
+        }
+    }
+
+    // Length (magnitude)
+    float Length() const {
+        return std::sqrt(LengthSquared());
+    }
+
     // Unary operator -
     Vector2<T> operator-() const {
         return Vector2<T>(-x, -y);
@@ -292,3 +316,31 @@ using RNGi32 = RNGi<int32_t>;
 using RNGi64 = RNGi<int64_t>;
 using RNGu32 = RNGi<uint32_t>;
 using RNGu64 = RNGi<uint64_t>;
+
+static float PointToSegmentDistance(const Vector2<float>& point, const Vector2<float>& segmentStart, const Vector2<float>& segmentEnd) {
+    const float lengthSquared = (segmentEnd - segmentStart).LengthSquared();
+    if (lengthSquared == 0.0) return (point - segmentStart).Length();
+
+    const float t = std::max(0.0f, std::min(1.0f, (point - segmentStart).Dot(segmentEnd - segmentStart) / lengthSquared));
+    const Vector2<float> projection = segmentStart + t * (segmentEnd - segmentStart);
+    return (point - projection).Length();
+}
+
+static Vector2<float> ClosestPointOnSegment(Vector2<float> point, Vector2<float> segmentStart, Vector2<float> segmentEnd) {
+    Vector2<float> segmentDirection = segmentEnd - segmentStart;
+    float segmentLengthSquared = segmentDirection.LengthSquared();
+
+    // If the segment is a point, return the segment start
+    if (segmentLengthSquared == 0.0f) {
+        return segmentStart;
+    }
+
+    // Calculate the projection of the point onto the segment
+    float t = (point - segmentStart).Dot(segmentDirection) / segmentLengthSquared;
+
+    // Clamp the projection to the segment bounds
+    t = std::max(0.0f, std::min(1.0f, t));
+
+    // Calculate the closest point
+    return segmentStart + segmentDirection * t;
+}
