@@ -55,8 +55,15 @@ private:
         float dt = (1.0f / fps);
 
         struct Verlet {
-
-        };
+            float object_spawn_delay = 0.025f;
+            float object_spawn_speed = 1000.0f;
+            float object_min_radius = 5.0f;
+            float object_max_radius = 20.0f;
+            float object_spawn_position_x = 0.0f;
+            float object_spawn_position_y = 0.0f;
+            uint32_t max_objects_count = 500;
+            float max_angle = 1.0f;
+        } verlet;
     } simulations;
 
     struct UI {

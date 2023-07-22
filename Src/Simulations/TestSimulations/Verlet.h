@@ -278,13 +278,14 @@ public:
         solver.setSubStepsCount(settings.GetSimulations().subSteps);
 
         // Set simulation attributes
-        const float object_spawn_delay = 0.025f;
-        const float object_spawn_speed = 1000.0f;
-        const float object_min_radius = 5.0f;
-        const float object_max_radius = 20.0f;
+        const float object_spawn_delay = settings.GetSimulations().verlet.object_spawn_delay;
+        const float object_spawn_speed = settings.GetSimulations().verlet.object_spawn_speed;
+        const float object_min_radius = settings.GetSimulations().verlet.object_min_radius;
+        const float object_max_radius = settings.GetSimulations().verlet.object_max_radius;
+        // Make a custom spawn location function
         const Vector2<float> object_spawn_position = {settings.GetWindow().width / 2.0f, object_max_radius};
-        const uint32_t max_objects_count = 500;
-        const float max_angle = 1.0f;
+        const uint32_t max_objects_count = settings.GetSimulations().verlet.max_objects_count;
+        const float max_angle = settings.GetSimulations().verlet.max_angle;
 
         // Spawn objects
         Uint32 current_time = SDL_GetTicks();
@@ -335,6 +336,45 @@ public:
 
         if (ImGui::Checkbox("Use Window As Constraint", &solver.m_window_constraint)) {
             solver.useWindowAsConstraint(solver.m_window_constraint);
+        }
+
+        ImGui::Separator();
+
+        ImGui::Text("Object Settings");
+
+        float object_spawn_delay = settings.GetSimulations().verlet.object_spawn_delay;
+        if (ImGui::SliderFloat("Object Spawn Delay", &object_spawn_delay, 0.0f, 10.0f)) {
+            settings.GetSimulations().verlet.object_spawn_delay = object_spawn_delay;
+        }
+
+        float object_spawn_speed = settings.GetSimulations().verlet.object_spawn_speed;
+        if (ImGui::SliderFloat("Object Spawn Speed", &object_spawn_speed, 0.0f, 10.0f)) {
+            settings.GetSimulations().verlet.object_spawn_speed = object_spawn_speed;
+        }
+
+        float object_min_radius = settings.GetSimulations().verlet.object_min_radius;
+        if (ImGui::SliderFloat("Object Min Radius", &object_min_radius, 0.0f, 100.0f)) {
+            settings.GetSimulations().verlet.object_min_radius = object_min_radius;
+        }
+
+        float object_max_radius = settings.GetSimulations().verlet.object_max_radius;
+        if (ImGui::SliderFloat("Object Max Radius", &object_max_radius, 0.0f, 100.0f)) {
+            settings.GetSimulations().verlet.object_max_radius = object_max_radius;
+        }
+
+        /*Vector2<float> object_spawn_position = {settings.GetWindow().width / 2.0f, object_max_radius};
+        if (ImGui::DragFloat2("Object Spawn Position", (float*)&object_spawn_position, 1.0f, 0.0f, settings.GetWindow().width)) {
+            settings.GetSimulations().verlet.object_spawn_position = object_spawn_position;
+        }*/
+
+        uint32_t max_objects_count = settings.GetSimulations().verlet.max_objects_count;
+        if (ImGui::SliderInt("Max Objects Count", (int*)&max_objects_count, 1, 1000)) {
+            settings.GetSimulations().verlet.max_objects_count = max_objects_count;
+        }
+
+        const float max_angle = settings.GetSimulations().verlet.max_angle;
+        if (ImGui::SliderFloat("Max Angle", (float*)&max_angle, 1, 10)) {
+            settings.GetSimulations().verlet.max_angle = max_angle;
         }
 
         ImGui::Separator();
