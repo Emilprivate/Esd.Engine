@@ -57,6 +57,9 @@ namespace Styles {
         style.Colors[ImGuiCol_TabActive] = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
         style.Colors[ImGuiCol_TabUnfocused] = darkGrey;
         style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
+        style.Colors[ImGuiCol_Header] = darkGrey;
+        style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.25f, 0.25f, 0.25f, 0.80f);
+        style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.0f);
     }
 
     inline void DarkTheme() {
@@ -87,7 +90,7 @@ namespace Styles {
         style.Colors[ImGuiCol_WindowBg] = black;
         style.Colors[ImGuiCol_ChildBg] = black;
         style.Colors[ImGuiCol_PopupBg] = black;
-        style.Colors[ImGuiCol_Border] = black;
+        style.Colors[ImGuiCol_Border] = grey;
         style.Colors[ImGuiCol_BorderShadow] = black;
         style.Colors[ImGuiCol_FrameBg] = black;
         style.Colors[ImGuiCol_FrameBgHovered] = grey;
@@ -111,6 +114,9 @@ namespace Styles {
         style.Colors[ImGuiCol_TabActive] = grey;
         style.Colors[ImGuiCol_TabUnfocused] = black;
         style.Colors[ImGuiCol_TabUnfocusedActive] = grey;
+        style.Colors[ImGuiCol_Header] = black;
+        style.Colors[ImGuiCol_HeaderHovered] = grey;
+        style.Colors[ImGuiCol_HeaderActive] = grey;
     }
 
     inline void LightTheme() {
@@ -165,5 +171,8 @@ namespace Styles {
         style.Colors[ImGuiCol_TabActive] = grey;
         style.Colors[ImGuiCol_TabUnfocused] = white;
         style.Colors[ImGuiCol_TabUnfocusedActive] = grey;
+        style.Colors[ImGuiCol_Header] = white;
+        style.Colors[ImGuiCol_HeaderHovered] = grey;
+        style.Colors[ImGuiCol_HeaderActive] = grey;
     }
 }

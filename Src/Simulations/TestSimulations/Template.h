@@ -64,15 +64,7 @@ public:
         // Fill this according to the requirements of your new simulation
     }
 
-    // Override the Update function from SimulationBase. This should update the state
-    // of the simulation on each frame.
-    void Update() override {
-        // Fill this according to the requirements of your new simulation
-    }
-
-    // Override the Render function from SimulationBase. This should render the
-    // current state of the simulation to the screen.
-    void Render() override {
+    void Run() override {
         // Fill this according to the requirements of your new simulation
     }
 

@@ -1,5 +1,11 @@
 #include "SimulationsHandler.h"
 
+SimulationsHandler& SimulationsHandler::GetInstance()
+{
+    static SimulationsHandler instance;
+    return instance;
+}
+
 void SimulationsHandler::SetCurrentSimulation(int index)
 {
     currentSimulation = simulations[index];
@@ -7,36 +13,24 @@ void SimulationsHandler::SetCurrentSimulation(int index)
 
 void SimulationsHandler::Initialize()
 {
-    if (currentSimulation) {
+    if (currentSimulation)
+    {
         currentSimulation->Initialize();
     }
 }
 
-void SimulationsHandler::Update()
+void SimulationsHandler::Run()
 {
-    if (currentSimulation) {
-        currentSimulation->Update();
-    }
-}
-
-void SimulationsHandler::Render()
-{
-    if (currentSimulation) {
-        currentSimulation->Render();
+    if (currentSimulation)
+    {
+        currentSimulation->Run();
     }
 }
 
 void SimulationsHandler::RenderUI()
 {
-    if (currentSimulation) {
+    if (currentSimulation)
+    {
         currentSimulation->RenderUI();
     }
-}
-
-std::vector<std::string> SimulationsHandler::GetSimulationNames() {
-    std::vector<std::string> names;
-    for (const auto& simulation : simulations) {
-        names.push_back(simulation->GetName());
-    }
-    return names;
 }

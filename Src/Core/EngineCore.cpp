@@ -1,25 +1,32 @@
 #include "EngineCore.h"
 
-void EngineCore::Run()
+Uint32 EngineCore::CalculateFrameDelay()
 {
-    Renderer renderer = Renderer();
-    Settings& settings = Settings::GetInstance();
-    renderer.Initialize();
+    auto& settings = Settings::GetInstance().GetSimulations();
+    return 1000 / settings.fps;
+}
 
-    while (!renderer.ShouldClose())
+void EngineCore::EngineLoop()
+{
+    const Uint32 frameDelay = CalculateFrameDelay();
+
+    while (!Renderer::ShouldClose())
     {
         Uint32 frameStart = SDL_GetTicks();
 
-        renderer.Render();
+        Renderer::Run();
 
-        Uint32 frameEnd = SDL_GetTicks();
-        Uint32 frameTime = frameEnd - frameStart;
+        Uint32 frameTime = SDL_GetTicks() - frameStart;
 
-        if (frameTime < 1000 / settings.GetSimulations().fps)
+        if (frameTime < frameDelay)
         {
-            SDL_Delay((1000 / settings.GetSimulations().fps) - frameTime);
+            SDL_Delay(frameDelay - frameTime);
         }
     }
+}
 
-    renderer.Cleanup();
+void EngineCore::Run()
+{
+    Renderer::Initialize();
+    EngineLoop();
 }

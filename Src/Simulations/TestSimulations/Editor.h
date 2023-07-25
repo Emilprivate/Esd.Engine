@@ -152,14 +152,16 @@ private:
 
 public:
     EditorSimulationManager() = default;
+    ~EditorSimulationManager() = default;
 
     void Initialize() override
     {
-        SDL_SetRelativeMouseMode(SDL_TRUE);
+
     }
 
-    void Update() override
+    void Run() override
     {
+        // Update section
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -217,11 +219,8 @@ public:
             delete currentWall;
             currentWall = nullptr;
         }
-    }
 
-    void Render() override
-    {
-
+        // Render section
         DrawObject();
 
         if (isEraserMode)

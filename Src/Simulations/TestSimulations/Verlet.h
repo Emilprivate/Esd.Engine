@@ -19,6 +19,7 @@ struct VerletObject
     Color          color  = Color{1.0f, 0.0f, 0.0f};
 
     VerletObject() = default;
+
     VerletObject(Vector2<float> position_, float radius_):
         position{position_},
         position_last{position_},
@@ -51,7 +52,7 @@ struct VerletObject
         position_last -= v * dt;
     }
 
-    [[nodiscard]]
+    [[maybe_unused]] [[nodiscard]]
     Vector2<float> getVelocity(float dt) const
     {
         if (dt != 0.0f) {
@@ -59,6 +60,8 @@ struct VerletObject
         } else {
             std::cerr << "Warning: Division by zero detected at [getVelocity]. Returning default Vector2 value." << std::endl;
         }
+
+        return Vector2<float>{};
     }
 };
 
@@ -66,10 +69,20 @@ class Solver
 {
 public:
     Solver() = default;
+    ~Solver() = default;
 
     VerletObject& addObject(Vector2<float> position, float radius)
     {
         return m_objects.emplace_back(position, radius);
+    }
+
+    VerletObject& getObject(size_t index)
+    {
+        if (index < m_objects.size()) {
+            return m_objects[index];
+        } else {
+            throw std::out_of_range("Index out of range in getObject()");
+        }
     }
 
     void update()
@@ -89,18 +102,12 @@ public:
         m_frame_dt = 1.0f / static_cast<float>(rate);
     }
 
-    void setConstraint(Vector2<float> position, float radius)
-    {
-        m_constraint_center = position;
-        m_constraint_radius = radius;
-    }
-
     void setSubStepsCount(uint32_t sub_steps)
     {
         m_sub_steps = sub_steps;
     }
 
-    void setObjectVelocity(VerletObject& object, Vector2<float> v)
+    void setObjectVelocity(VerletObject& object, Vector2<float> v) const
     {
         object.setVelocity(v, getStepDt());
     }
@@ -132,33 +139,15 @@ public:
         } else {
             std::cerr << "Warning: Division by zero detected at [getStepDt]. Returning default value 0." << std::endl;
         }
+
+        return 0.0f;
     }
 
-    [[nodiscard]]
-    Vector2<float> getConstraintCenter() const
-    {
-        return m_constraint_center;
-    }
-
-    [[nodiscard]]
-    float getConstraintRadius() const
-    {
-        return m_constraint_radius;
-    }
-
-
-    void useWindowAsConstraint(bool shouldUseWindow) {
-        m_window_constraint = shouldUseWindow;
-    }
-
-    bool                      m_window_constraint  = true;
 private:
     Settings&                 m_settings           = Settings::GetInstance();
 
     uint32_t                  m_sub_steps          = 1;
     Vector2<float>            m_gravity            = {0.0f, 1000.0f};
-    Vector2<float>            m_constraint_center;
-    float                     m_constraint_radius  = 100.0f;
     std::vector<VerletObject> m_objects;
     float                     m_time               = 0.0f;
     float                     m_frame_dt           = 0.0f;
@@ -208,28 +197,12 @@ private:
 
     void applyConstraint()
     {
-        if(m_window_constraint) {
-            const auto& windowSize = m_settings.GetWindow();
-            for (auto& obj : m_objects) {
-                if (obj.position.x - obj.radius < 0) obj.position.x = obj.radius;
-                if (obj.position.y - obj.radius < 0) obj.position.y = obj.radius;
-                if (obj.position.x + obj.radius > windowSize.width) obj.position.x = windowSize.width - obj.radius;
-                if (obj.position.y + obj.radius > windowSize.height) obj.position.y = windowSize.height - obj.radius;
-            }
-        } else {
-            for (auto& obj : m_objects) {
-                const Vector2<float> v    = m_constraint_center - obj.position;
-                const float        dist = sqrt(v.x * v.x + v.y * v.y);
-                if (dist != 0.0f) {
-                    if (dist > (m_constraint_radius - obj.radius)) {
-                        const Vector2<float> n = v / dist;
-                        obj.position = m_constraint_center - n * (m_constraint_radius - obj.radius);
-                    }
-                }
-                else {
-                    std::cerr << "Warning: Division by zero detected at [dist -> applyConstraint]. Skipping operation." << std::endl;
-                }
-            }
+        const auto& windowSize = m_settings.GetWindow();
+        for (auto& obj : m_objects) {
+            if (obj.position.x - obj.radius < 0) obj.position.x = obj.radius;
+            if (obj.position.y - obj.radius < 0) obj.position.y = obj.radius;
+            if (obj.position.x + obj.radius > (float)windowSize.width) obj.position.x = (float)windowSize.width - obj.radius;
+            if (obj.position.y + obj.radius > (float)windowSize.height) obj.position.y = (float)windowSize.height - obj.radius;
         }
     }
 
@@ -248,48 +221,51 @@ private:
     bool simulationRunning = false;
     Uint32 last_spawn_time = 0;
 
-    void DrawCircle(float x, float y, float radius, Color color)
+    static void DrawCircle(float x, float y, float radius, Color color)
     {
         const float DEG2RAD = 3.14159f / 180;
         glBegin(GL_TRIANGLE_FAN);
         glColor3f(color.red, color.green, color.blue);
         glVertex2f(x, y);
         for (int i = 0; i <= 360; i++) {
-            float degInRad = i * DEG2RAD;
+            float degInRad = (float)i * DEG2RAD;
             glVertex2f(x + cos(degInRad) * radius, y + sin(degInRad) * radius);
         }
         glEnd();
     }
 
 public:
-    VerletSimulationManager() {}
+    VerletSimulationManager() = default;
+    ~VerletSimulationManager() = default;
 
     void Initialize() override
     {
-        solver.setConstraint(Vector2<float>{settings.GetWindow().width / 2.0f, settings.GetWindow().height / 2.0f}, 400.0f);
+        std::cout << "VerletSimulationManager::Initialize()" << std::endl;
+        solver.addObject({(float)settings.GetWindow().width / 2.0f, (float)settings.GetWindow().height / 2.0f}, 50.0f);
     }
 
-    void Update() override {
+    void Run() override {
         if (!simulationRunning)
             return;
 
-        // Solver configration
-        solver.setSimulationUpdateRate(settings.GetSimulations().fps);
-        solver.setSubStepsCount(settings.GetSimulations().subSteps);
+        // Solver configuration
+        solver.setSimulationUpdateRate((uint32_t)settings.GetSimulations().fps);
+        solver.setSubStepsCount((uint32_t)settings.GetSimulations().verlet.subSteps);
 
         // Set simulation attributes
         const float object_spawn_delay = settings.GetSimulations().verlet.object_spawn_delay;
         const float object_spawn_speed = settings.GetSimulations().verlet.object_spawn_speed;
         const float object_min_radius = settings.GetSimulations().verlet.object_min_radius;
         const float object_max_radius = settings.GetSimulations().verlet.object_max_radius;
+
         // Make a custom spawn location function
-        const Vector2<float> object_spawn_position = {settings.GetWindow().width / 2.0f, object_max_radius};
+        const Vector2<float> object_spawn_position = {(float)settings.GetWindow().width / 2.0f, object_max_radius};
         const uint32_t max_objects_count = settings.GetSimulations().verlet.max_objects_count;
         const float max_angle = settings.GetSimulations().verlet.max_angle;
 
         // Spawn objects
         Uint32 current_time = SDL_GetTicks();
-        float elapsed_time = (current_time - last_spawn_time) / 1000.0f;
+        float elapsed_time = (float)(current_time - last_spawn_time) / 1000.0f;
 
         if (elapsed_time >= object_spawn_delay && solver.getObjectsCount() < max_objects_count) {
             std::cout << "Spawn object" << std::endl;
@@ -304,26 +280,16 @@ public:
         }
 
         solver.update();
-    }
 
-
-    void Render() override
-    {
-        if (!solver.m_window_constraint)
-        {
-            Vector2<float> constraint_center = solver.getConstraintCenter();
-            float constraint_radius = solver.getConstraintRadius();
-            Color constraint_color = {0.1f, 0.1f, 0.1f};
-            DrawCircle(constraint_center.x, constraint_center.y, constraint_radius, constraint_color);
-        }
-
+        // Rendering part
         for (const auto& object : solver.getObjects()) {
             DrawCircle(object.position.x, object.position.y, object.radius, object.color);
         }
     }
 
-    void RenderUI() override
-    {
+    void RenderUI() override {
+        ImGui::SliderInt("Substeps", &settings.GetSimulations().verlet.subSteps, 1, 20);
+
         if (ImGui::Button("Start Simulation")) {
             simulationRunning = true;
         }
@@ -334,57 +300,47 @@ public:
             simulationRunning = false;
         }
 
-        if (ImGui::Checkbox("Use Window As Constraint", &solver.m_window_constraint)) {
-            solver.useWindowAsConstraint(solver.m_window_constraint);
-        }
-
         ImGui::Separator();
 
-        ImGui::Text("Object Settings");
+        if (ImGui::CollapsingHeader("Object Settings")) {
+            float object_spawn_delay = settings.GetSimulations().verlet.object_spawn_delay;
+            if (ImGui::SliderFloat("Object Spawn Delay", &object_spawn_delay, 0.0f, 10.0f)) {
+                settings.GetSimulations().verlet.object_spawn_delay = object_spawn_delay;
+            }
 
-        float object_spawn_delay = settings.GetSimulations().verlet.object_spawn_delay;
-        if (ImGui::SliderFloat("Object Spawn Delay", &object_spawn_delay, 0.0f, 10.0f)) {
-            settings.GetSimulations().verlet.object_spawn_delay = object_spawn_delay;
+            float object_spawn_speed = settings.GetSimulations().verlet.object_spawn_speed;
+            if (ImGui::SliderFloat("Object Spawn Speed", &object_spawn_speed, 0.0f, 10.0f)) {
+                settings.GetSimulations().verlet.object_spawn_speed = object_spawn_speed;
+            }
+
+            float object_min_radius = settings.GetSimulations().verlet.object_min_radius;
+            if (ImGui::SliderFloat("Object Min Radius", &object_min_radius, 0.0f, 100.0f)) {
+                settings.GetSimulations().verlet.object_min_radius = object_min_radius;
+            }
+
+            float object_max_radius = settings.GetSimulations().verlet.object_max_radius;
+            if (ImGui::SliderFloat("Object Max Radius", &object_max_radius, 0.0f, 100.0f)) {
+                settings.GetSimulations().verlet.object_max_radius = object_max_radius;
+            }
+
+            uint32_t max_objects_count = settings.GetSimulations().verlet.max_objects_count;
+            if (ImGui::SliderInt("Max Objects Count", (int*)&max_objects_count, 1, 1000)) {
+                settings.GetSimulations().verlet.max_objects_count = max_objects_count;
+            }
+
+            float max_angle = settings.GetSimulations().verlet.max_angle;
+            if (ImGui::SliderFloat("Max Angle", &max_angle, 0.0f, 2*PI)) {
+                settings.GetSimulations().verlet.max_angle = max_angle;
+            }
         }
 
-        float object_spawn_speed = settings.GetSimulations().verlet.object_spawn_speed;
-        if (ImGui::SliderFloat("Object Spawn Speed", &object_spawn_speed, 0.0f, 10.0f)) {
-            settings.GetSimulations().verlet.object_spawn_speed = object_spawn_speed;
+        if (ImGui::CollapsingHeader("Simulation Info")) {
+            ImGui::BeginGroup();
+            ImGui::Text("Number of objects: %llu", solver.getObjectsCount());
+            ImGui::Text("Simulation time: %.3f", solver.getTime());
+            ImGui::Text("Simulation update rate: %.3f", solver.getStepDt());
+            ImGui::EndGroup();
         }
-
-        float object_min_radius = settings.GetSimulations().verlet.object_min_radius;
-        if (ImGui::SliderFloat("Object Min Radius", &object_min_radius, 0.0f, 100.0f)) {
-            settings.GetSimulations().verlet.object_min_radius = object_min_radius;
-        }
-
-        float object_max_radius = settings.GetSimulations().verlet.object_max_radius;
-        if (ImGui::SliderFloat("Object Max Radius", &object_max_radius, 0.0f, 100.0f)) {
-            settings.GetSimulations().verlet.object_max_radius = object_max_radius;
-        }
-
-        /*Vector2<float> object_spawn_position = {settings.GetWindow().width / 2.0f, object_max_radius};
-        if (ImGui::DragFloat2("Object Spawn Position", (float*)&object_spawn_position, 1.0f, 0.0f, settings.GetWindow().width)) {
-            settings.GetSimulations().verlet.object_spawn_position = object_spawn_position;
-        }*/
-
-        uint32_t max_objects_count = settings.GetSimulations().verlet.max_objects_count;
-        if (ImGui::SliderInt("Max Objects Count", (int*)&max_objects_count, 1, 1000)) {
-            settings.GetSimulations().verlet.max_objects_count = max_objects_count;
-        }
-
-        const float max_angle = settings.GetSimulations().verlet.max_angle;
-        if (ImGui::SliderFloat("Max Angle", (float*)&max_angle, 1, 10)) {
-            settings.GetSimulations().verlet.max_angle = max_angle;
-        }
-
-        ImGui::Separator();
-
-        ImGui::BeginGroup();
-        ImGui::Text("Number of objects: %d", solver.getObjectsCount());
-        ImGui::Text("Simulation time: %.3f", solver.getTime());
-        ImGui::Text("Simulation update rate: %.3f", solver.getStepDt());
-        ImGui::Text("Simulation sub steps: %d", solver.getObjectsCount());
-        ImGui::EndGroup();
     }
 
     std::string GetName() override {

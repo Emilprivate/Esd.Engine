@@ -8,28 +8,19 @@
 
 class SimulationsHandler {
 private:
-    Settings& settings = Settings::GetInstance();
     std::vector<SimulationBase*> simulations;
     SimulationBase* currentSimulation = nullptr;
 
-    SimulationsHandler() {
+    SimulationsHandler()
+    {
         AddSimulation(new VerletSimulationManager());
         AddSimulation(new EditorSimulationManager());
     }
 
-    ~SimulationsHandler() {
-        for (auto simulation : simulations) {
+    ~SimulationsHandler()
+    {
+        for (auto simulation: simulations)
             delete simulation;
-        }
-    }
-
-public:
-    SimulationsHandler(const SimulationsHandler&) = delete;
-    SimulationsHandler& operator=(const SimulationsHandler&) = delete;
-
-    static SimulationsHandler& GetInstance() {
-        static SimulationsHandler instance;
-        return instance;
     }
 
     void AddSimulation(SimulationBase* simulation) {
@@ -39,11 +30,23 @@ public:
         }
     }
 
+public:
+    SimulationsHandler(const SimulationsHandler&) = delete;
+    SimulationsHandler& operator=(const SimulationsHandler&) = delete;
+
+    static SimulationsHandler& GetInstance();
+
+    std::vector<std::string> GetSimulationNames() {
+        std::vector<std::string> names;
+        for (const auto& simulation : simulations)
+        {
+            names.push_back(simulation->GetName());
+        }
+        return names;
+    }
+
     void SetCurrentSimulation(int index);
     void Initialize();
-    void Render();
-    void Update();
+    void Run();
     void RenderUI();
-
-    std::vector<std::string> GetSimulationNames();
 };

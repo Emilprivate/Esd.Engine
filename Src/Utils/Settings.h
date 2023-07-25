@@ -8,13 +8,16 @@
 
 class Settings {
 private:
+    Settings() = default;
+    ~Settings() = default;
+
     struct Window {
         int width = 1200;
         int height = 800;
         const char* title = "Esd.Engine";
 
-        SDL_Window* window;
-        SDL_GLContext gl_context;
+        SDL_Window* window{};
+        SDL_GLContext gl_context{};
 
         void SetSize(int newWidth, int newHeight)
         {
@@ -50,11 +53,13 @@ private:
     } renderer;
 
     struct Simulations {
-        int subSteps = 8;
-        float fps = 60.0f;
+        float fps = 60;
         float dt = (1.0f / fps);
 
+        bool init_new_sim = true;
+
         struct Verlet {
+            int subSteps = 8;
             float object_spawn_delay = 0.025f;
             float object_spawn_speed = 1000.0f;
             float object_min_radius = 5.0f;
@@ -81,6 +86,9 @@ private:
     } ui;
 
 public:
+    Settings(const Settings&) = delete;
+    Settings& operator=(const Settings&) = delete;
+
     Renderer& GetRenderer() { return renderer; }
     Window& GetWindow() { return window; }
     Simulations& GetSimulations() { return simulations; }
@@ -104,17 +112,17 @@ public:
         {
             if (ImGui::BeginMenu("Themes"))
             {
-                if (ImGui::MenuItem("Default", NULL, ui.currentTheme == UI::ThemeType::Default))
+                if (ImGui::MenuItem("Default", nullptr, ui.currentTheme == UI::ThemeType::Default))
                 {
                     ui.currentTheme = UI::ThemeType::Default;
                     Styles::DefaultStyle();
                 }
-                if (ImGui::MenuItem("Dark", NULL, ui.currentTheme == UI::ThemeType::Dark))
+                if (ImGui::MenuItem("Dark", nullptr, ui.currentTheme == UI::ThemeType::Dark))
                 {
                     ui.currentTheme = UI::ThemeType::Dark;
                     Styles::DarkTheme();
                 }
-                if (ImGui::MenuItem("Light", NULL, ui.currentTheme == UI::ThemeType::Light))
+                if (ImGui::MenuItem("Light", nullptr, ui.currentTheme == UI::ThemeType::Light))
                 {
                     ui.currentTheme = UI::ThemeType::Light;
                     Styles::LightTheme();

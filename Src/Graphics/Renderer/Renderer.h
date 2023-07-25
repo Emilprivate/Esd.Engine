@@ -13,19 +13,11 @@
 class Renderer
 {
 public:
-    explicit Renderer();
-    ~Renderer();
+    Renderer() { Initialize(); }
+    ~Renderer() { Cleanup(); }
 
-    void Initialize();
-    void Render();
-    void Cleanup();
-
-    bool ShouldClose();
-
-private:
-    bool isInitialized;
-
-    Settings& settings = Settings::GetInstance();
-    SimulationsHandler& simulationsHandler = SimulationsHandler::GetInstance();
-    UI ui;
+    static void Initialize();
+    static void Run();
+    static bool ShouldClose();
+    static void Cleanup();
 };

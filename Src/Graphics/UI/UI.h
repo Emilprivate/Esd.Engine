@@ -11,11 +11,8 @@ public:
     UI() = default;
     ~UI() = default;
 
-    void Render();
+    static void Render();
 
 private:
-    Settings& settings = Settings::GetInstance();
-    SimulationsHandler& simulationsHandler = SimulationsHandler::GetInstance();
-
-    void MainMenuBar();
+    static void MainMenuBar();
 };
