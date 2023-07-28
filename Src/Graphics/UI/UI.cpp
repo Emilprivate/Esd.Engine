@@ -32,7 +32,7 @@ void UI::Render()
     if (Settings::GetInstance().GetUI().ShowEngineMenu()) {
         ImGui::SetNextWindowSize(ImVec2(400, 400));
 
-        ImGui::Begin("Esd.Engine Menu", &Settings::GetInstance().GetUI().ShowEngineMenu(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Esd.2DEngine Menu", &Settings::GetInstance().GetUI().ShowEngineMenu(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
 
         if (Settings::GetInstance().GetUI().ShowDemoWindow()) {
             ImGui::ShowDemoWindow(&Settings::GetInstance().GetUI().ShowDemoWindow());

@@ -14,7 +14,7 @@ private:
     struct Window {
         int width = 1200;
         int height = 800;
-        const char* title = "Esd.Engine";
+        const char* title = "Esd.2DEngine";
 
         SDL_Window* window{};
         SDL_GLContext gl_context{};
