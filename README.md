@@ -1,2 +1,2 @@
-# Esd.2DEngine
-An object-oriented general purpose 2D physics engine.
+# Esd.Engine
+An object-oriented general purpose physics engine.
