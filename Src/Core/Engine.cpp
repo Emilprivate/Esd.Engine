@@ -22,6 +22,8 @@ namespace EsdEngineCore {
         renderer = std::make_unique<EsdEngineGraphics::Renderer>();
         renderer->Initialize();
 
+        // TODO: Make sure the simulations handler initializes all of the simulations,
+        //  right now it only initializes the first one added inside SimulationsHandler.cpp
         std::cout << "Initializing simulations handler" << std::endl;
         simHandler = std::make_unique<EsdEngineSimulations::SimulationsHandler>();
         simHandler->Initialize();

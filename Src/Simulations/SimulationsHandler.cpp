@@ -11,8 +11,8 @@ namespace EsdEngineSimulations {
 
     void SimulationsHandler::Initialize()
     {
-        AddSimulation(new VerletSimulationManager());
         AddSimulation(new EditorSimulationManager());
+        AddSimulation(new VerletSimulationManager());
 
         if (currentSimulation)
         {
