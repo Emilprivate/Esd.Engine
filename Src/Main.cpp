@@ -1,8 +1,7 @@
-#include "Core/Application.h"
+#include "Core/Engine.h"
 
 int main(int, char**)
 {
-    Application app;
-    app.Run();
+    EsdEngineCore::Run();
     return 0;
 }
