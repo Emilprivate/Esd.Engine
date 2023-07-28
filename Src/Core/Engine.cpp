@@ -23,7 +23,7 @@ namespace EsdEngineCore {
 
     Engine::~Engine() = default;
 
-    void EsdEngineCore::Run() {
+    void Run() {
         Engine engine;
 
         Uint32 frameDelay;
