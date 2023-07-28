@@ -1,4 +1,6 @@
 #pragma once
+#include "../../Utils/Settings.h"
+#include "Graphics/UI/UI.h"
 
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -6,18 +8,18 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_opengl2.h>
 
-#include "../../Utils/Settings.h"
-#include "../UI/UI.h"
-#include "../../Simulations/SimulationsHandler.h"
 
-class Renderer
-{
+class Renderer {
 public:
-    Renderer() { Initialize(); }
-    ~Renderer() { Cleanup(); }
+    Renderer();
+    ~Renderer();
 
-    static void Initialize();
-    static void Run();
-    static bool ShouldClose();
-    static void Cleanup();
+    void Initialize();
+    void Render(UI& ui, SimulationsHandler& simHandler);
+    void Cleanup();
+
+private:
+    Settings& settings = Settings::GetInstance();
+
+    void RenderImGui();
 };

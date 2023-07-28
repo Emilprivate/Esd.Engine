@@ -11,6 +11,10 @@ private:
     Settings() = default;
     ~Settings() = default;
 
+    struct Application {
+        bool exit = false;
+    } application;
+
     struct Window {
         int width = 1200;
         int height = 800;
@@ -53,7 +57,7 @@ private:
     } renderer;
 
     struct Simulations {
-        float fps = 60;
+        float fps = 120;
         float dt = (1.0f / fps);
 
         bool init_new_sim = true;
@@ -89,6 +93,7 @@ public:
     Settings(const Settings&) = delete;
     Settings& operator=(const Settings&) = delete;
 
+    Application& GetApplication() { return application; }
     Renderer& GetRenderer() { return renderer; }
     Window& GetWindow() { return window; }
     Simulations& GetSimulations() { return simulations; }

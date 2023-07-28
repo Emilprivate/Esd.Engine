@@ -116,12 +116,6 @@ public:
         }
     }
 
-    void Run()
-    {
-        UpdateShapes();
-        DrawShapes();
-    }
-
     void RenderUI(){
         if (ImGui::BeginCombo("Shapes", currentShape.c_str()))
         {
@@ -143,7 +137,7 @@ public:
 
         if (ImGui::IsMouseClicked(0))
         {
-            if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) | ImGui::IsAnyItemActive() | ImGui::IsAnyItemFocused() | ImGui::IsAnyItemHovered())
+            if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemActive() || ImGui::IsAnyItemFocused() || ImGui::IsAnyItemHovered())
                 return;
 
             ImVec2 mousePos = ImGui::GetMousePos();
@@ -172,13 +166,17 @@ public:
     ~EditorSimulationManager() = default;
 
     void Initialize() override {
-        // TODO: Make sure the initialization is done only once
         shapesManager.InitializeShapes();
     }
 
-    void Run() override
+    void Update() override
     {
-        shapesManager.Run();
+        shapesManager.UpdateShapes();
+    }
+
+    void Render() override
+    {
+        shapesManager.DrawShapes();
     }
 
     void RenderUI() override

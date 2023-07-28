@@ -1,11 +1,5 @@
 #include "SimulationsHandler.h"
 
-SimulationsHandler& SimulationsHandler::GetInstance()
-{
-    static SimulationsHandler instance;
-    return instance;
-}
-
 void SimulationsHandler::SetCurrentSimulation(int index)
 {
     currentSimulation = simulations[index];
@@ -19,11 +13,17 @@ void SimulationsHandler::Initialize()
     }
 }
 
-void SimulationsHandler::Run()
-{
+void SimulationsHandler::Update(){
     if (currentSimulation)
     {
-        currentSimulation->Run();
+        currentSimulation->Update();
+    }
+}
+
+void SimulationsHandler::Render(){
+    if (currentSimulation)
+    {
+        currentSimulation->Render();
     }
 }
 

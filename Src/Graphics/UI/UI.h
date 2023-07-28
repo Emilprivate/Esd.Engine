@@ -8,11 +8,11 @@
 
 class UI {
 public:
-    UI() = default;
-    ~UI() = default;
-
-    static void Render();
+    explicit UI(SimulationsHandler& handler);
+    void Render();
 
 private:
-    static void MainMenuBar();
+    void MainMenuBar();
+    SimulationsHandler& simHandler;
+    Settings& settings = Settings::GetInstance();
 };

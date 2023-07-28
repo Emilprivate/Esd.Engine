@@ -1,7 +1,8 @@
-#include "Core/EngineCore.h"
+#include "Core/Application.h"
 
 int main(int, char**)
 {
-    EngineCore::Run();
+    Application app;
+    app.Run();
     return 0;
 }

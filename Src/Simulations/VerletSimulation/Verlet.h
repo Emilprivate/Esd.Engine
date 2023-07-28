@@ -247,7 +247,7 @@ public:
 
     }
 
-    void Run() override {
+    void Update() override {
         if (running)
         {
             // Solver configuration
@@ -270,7 +270,6 @@ public:
             float elapsed_time = (float)(current_time - last_spawn_time) / 1000.0f;
 
             if (elapsed_time >= object_spawn_delay && solver.getObjectsCount() < max_objects_count) {
-                std::cout << "Spawn object" << std::endl;
                 auto &object = solver.addObject(object_spawn_position,
                                                 RNGf::getRange(object_min_radius, object_max_radius));
                 const float t = solver.getTime();
@@ -283,8 +282,9 @@ public:
 
             solver.update();
         }
+    }
 
-        // Rendering part
+    void Render() override {
         for (const auto& object : solver.getObjects()) {
             DrawCircle(object.position.x, object.position.y, object.radius, object.color);
         }

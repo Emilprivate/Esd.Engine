@@ -1,5 +1,7 @@
 #include "UI.h"
 
+UI::UI(SimulationsHandler& simHandler) : simHandler(simHandler) {}
+
 void UI::MainMenuBar()
 {
     ImGui::BeginMainMenuBar();
@@ -16,11 +18,11 @@ void UI::MainMenuBar()
 
     if (ImGui::BeginMenu("View"))
     {
-        ImGui::MenuItem("Esd.Engine Menu", nullptr, &Settings::GetInstance().GetUI().ShowEngineMenu());
+        ImGui::MenuItem("Esd.Engine Menu", nullptr, &settings.GetUI().ShowEngineMenu());
         ImGui::EndMenu();
     }
 
-    Settings::GetInstance().RenderUI();
+    settings.RenderUI();
 
     ImGui::EndMainMenuBar();
 }
@@ -29,17 +31,17 @@ void UI::Render()
 {
     MainMenuBar();
 
-    if (Settings::GetInstance().GetUI().ShowEngineMenu()) {
+    if (settings.GetUI().ShowEngineMenu()) {
         ImGui::SetNextWindowSize(ImVec2(400, 400));
 
-        ImGui::Begin("Esd.Engine Menu", &Settings::GetInstance().GetUI().ShowEngineMenu(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Esd.Engine Menu", &settings.GetUI().ShowEngineMenu(), ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize);
 
-        if (Settings::GetInstance().GetUI().ShowDemoWindow()) {
-            ImGui::ShowDemoWindow(&Settings::GetInstance().GetUI().ShowDemoWindow());
+        if (settings.GetUI().ShowDemoWindow()) {
+            ImGui::ShowDemoWindow(&settings.GetUI().ShowDemoWindow());
         }
 
         static int selectedSimulation = 0;
-        auto simulationNames = SimulationsHandler::GetInstance().GetSimulationNames();
+        auto simulationNames = simHandler.GetSimulationNames();
 
         std::vector<const char*> cstrs;
         std::transform(simulationNames.begin(), simulationNames.end(), std::back_inserter(cstrs),
@@ -49,13 +51,11 @@ void UI::Render()
 
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 4));
         if (ImGui::Combo("Simulation", &selectedSimulation, cstrs.data(), cstrs.size())) {
-            SimulationsHandler::GetInstance().SetCurrentSimulation(selectedSimulation);
-            Settings::GetInstance().GetSimulations().init_new_sim = true;
+            simHandler.SetCurrentSimulation(selectedSimulation);
+            settings.GetSimulations().init_new_sim = true;
         }
 
-        auto& simSettings = Settings::GetInstance().GetSimulations();
-        ImGui::SliderFloat("FPS", &simSettings.fps, 1.0f, 120.0f);
-        std::cout << simSettings.fps << std::endl;
+        ImGui::SliderFloat("FPS", &settings.GetSimulations().fps, 1.0f, 120.0f);
 
         ImGui::Separator();
 
@@ -64,7 +64,7 @@ void UI::Render()
         ImGui::Separator();
 
         ImGui::BeginChild("Simulation Settings", ImVec2(0, 0), true);
-        SimulationsHandler::GetInstance().RenderUI();
+        simHandler.RenderUI();
         ImGui::EndChild();
 
         ImGui::PopStyleVar();
