@@ -2,7 +2,7 @@
 
 namespace EsdEngineGraphics {
     Window::Window() = default;
-    Window::~Window() { Cleanup(); }
+    Window::~Window() = default;
 
     void Window::Initialize() {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -11,9 +11,9 @@ namespace EsdEngineGraphics {
             return;
         }
 
-#ifdef SDL_HINT_IME_SHOW_UI
-        SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-#endif
+        #ifdef SDL_HINT_IME_SHOW_UI
+                SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+        #endif
 
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);

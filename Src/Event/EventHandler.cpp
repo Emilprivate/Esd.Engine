@@ -28,4 +28,6 @@ namespace EsdEngineEvent {
 
         return false;
     }
+
+    void EventHandler::Cleanup(){}
 }

@@ -21,7 +21,19 @@ namespace EsdEngineCore {
         ui = std::make_unique<EsdEngineGraphics::UI>(*simHandler);
     }
 
-    Engine::~Engine() = default;
+    Engine::~Engine() {
+        std::cout << "Cleaning up renderer" << std::endl;
+        renderer->Cleanup();
+
+        std::cout << "Cleaning up window" << std::endl;
+        window->Cleanup();
+
+        std::cout << "Cleaning up simulations handler" << std::endl;
+        simHandler->Cleanup();
+
+        std::cout << "Cleaning up event handler" << std::endl;
+        eventHandler->Cleanup();
+    }
 
     void Run() {
         Engine engine;

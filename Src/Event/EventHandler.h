@@ -13,7 +13,7 @@ namespace EsdEngineEvent {
         ~EventHandler();
 
         void HandleEvents(EsdEngineGraphics::Window& window);
-
+        void Cleanup();
     private:
         bool CheckForExitRequest();
 

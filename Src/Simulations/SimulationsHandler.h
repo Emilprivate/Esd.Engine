@@ -20,17 +20,8 @@ namespace EsdEngineSimulations {
         }
 
     public:
-        SimulationsHandler()
-        {
-            AddSimulation(new EditorSimulationManager());
-            AddSimulation(new VerletSimulationManager());
-        }
-
-        ~SimulationsHandler()
-        {
-            for (auto simulation: simulations)
-                delete simulation;
-        }
+        SimulationsHandler();
+        ~SimulationsHandler();
 
         std::vector<std::string> GetSimulationNames() {
             std::vector<std::string> names;
@@ -46,5 +37,6 @@ namespace EsdEngineSimulations {
         void Update();
         void Render();
         void RenderUI();
+        void Cleanup();
     };
 }

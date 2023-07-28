@@ -1,6 +1,9 @@
 #include "SimulationsHandler.h"
 
 namespace EsdEngineSimulations {
+    SimulationsHandler::SimulationsHandler() = default;
+    SimulationsHandler::~SimulationsHandler() = default;
+
     void SimulationsHandler::SetCurrentSimulation(int index)
     {
         currentSimulation = simulations[index];
@@ -8,6 +11,9 @@ namespace EsdEngineSimulations {
 
     void SimulationsHandler::Initialize()
     {
+        AddSimulation(new VerletSimulationManager());
+        AddSimulation(new EditorSimulationManager());
+
         if (currentSimulation)
         {
             currentSimulation->Initialize();
@@ -34,6 +40,11 @@ namespace EsdEngineSimulations {
         {
             currentSimulation->RenderUI();
         }
+    }
+
+    void SimulationsHandler::Cleanup() {
+        for (auto simulation : simulations)
+            delete simulation;
     }
 
 }

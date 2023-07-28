@@ -2,7 +2,7 @@
 
 namespace EsdEngineGraphics {
     Renderer::Renderer() = default;
-    Renderer::~Renderer() { Cleanup(); }
+    Renderer::~Renderer() = default;
 
     void Renderer::Initialize() {
         IMGUI_CHECKVERSION();
