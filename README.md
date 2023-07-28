@@ -1,2 +1,2 @@
 # Esd.Engine
-Scalable, object oriented, physics engine. 
+An object-oriented general purpose 2D physics engine.
