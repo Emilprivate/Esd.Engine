@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Set project name, version, and languages
-project(Esd.2DEngine VERSION 1.0 LANGUAGES CXX)
+project(Esd.Engine VERSION 1.0 LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
