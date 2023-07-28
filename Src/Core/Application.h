@@ -3,7 +3,7 @@
 #include "../Graphics/Renderer/Renderer.h"
 #include "../Graphics/UI/UI.h"
 
-#include "../Input/EventHandler.h"
+#include "../Event/EventHandler.h"
 
 #include "../Simulations/SimulationsHandler.h"
 
