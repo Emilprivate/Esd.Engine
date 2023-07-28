@@ -8,18 +8,19 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_opengl2.h>
 
+namespace EsdEngineGraphics {
+    class Renderer {
+    public:
+        Renderer();
+        ~Renderer();
 
-class Renderer {
-public:
-    Renderer();
-    ~Renderer();
+        void Initialize();
+        void Render(UI& ui, EsdEngineSimulations::SimulationsHandler& simHandler);
+        void Cleanup();
 
-    void Initialize();
-    void Render(UI& ui, SimulationsHandler& simHandler);
-    void Cleanup();
+    private:
+        EsdEngineUtils::Settings& settings = EsdEngineUtils::Settings::GetInstance();
 
-private:
-    Settings& settings = Settings::GetInstance();
-
-    void RenderImGui();
-};
+        void RenderImGui();
+    };
+}

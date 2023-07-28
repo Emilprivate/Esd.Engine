@@ -1,8 +1,6 @@
 #pragma once
 #include <random>
 
-#define PI 3.14159265359f
-
 class NumberGenerator
 {
 protected:
@@ -155,12 +153,3 @@ using RNGi32 = RNGi<int32_t>;
 using RNGi64 = RNGi<int64_t>;
 using RNGu32 = RNGi<uint32_t>;
 using RNGu64 = RNGi<uint64_t>;
-
-static float PointToSegmentDistance(const Vector2<float>& point, const Vector2<float>& segmentStart, const Vector2<float>& segmentEnd) {
-    const float lengthSquared = (segmentEnd - segmentStart).LengthSquared();
-    if (lengthSquared == 0.0) return (point - segmentStart).Length();
-
-    const float t = std::max(0.0f, std::min(1.0f, (point - segmentStart).Dot(segmentEnd - segmentStart) / lengthSquared));
-    const Vector2<float> projection = segmentStart + t * (segmentEnd - segmentStart);
-    return (point - projection).Length();
-}

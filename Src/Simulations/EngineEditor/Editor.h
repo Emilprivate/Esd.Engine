@@ -156,7 +156,7 @@ public:
 };
 
 // The EditorSimulationManager class is responsible for running the simulation
-class EditorSimulationManager : public SimulationBase {
+class EditorSimulationManager : public EsdEngineSimulations::SimulationBase {
 private:
     Settings& settings = Settings::GetInstance();
     ShapesManager shapesManager;

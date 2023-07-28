@@ -6,17 +6,20 @@
 
 #include "../Graphics/Window/Window.h"
 
-class EventHandler {
-public:
-    EventHandler();
-    ~EventHandler();
+namespace EsdEngineEvent {
+    class EventHandler {
+    public:
+        EventHandler();
+        ~EventHandler();
 
-    void HandleEvents(Window& window);
+        void HandleEvents(EsdEngineGraphics::Window& window);
 
-private:
-    bool CheckForExitRequest();
+    private:
+        bool CheckForExitRequest();
 
-    SDL_Event event{};
-    Settings& settings = Settings::GetInstance();
-};
+        SDL_Event event{};
+        EsdEngineUtils::Settings& settings = EsdEngineUtils::Settings::GetInstance();
+    };
+}
+
 

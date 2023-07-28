@@ -6,13 +6,16 @@
 #include "../../Simulations/SimulationsHandler.h"
 #include "Styles.h"
 
-class UI {
-public:
-    explicit UI(SimulationsHandler& handler);
-    void Render();
+namespace EsdEngineGraphics {
+    class UI {
+    public:
+        explicit UI(EsdEngineSimulations::SimulationsHandler& handler);
+        void Render();
 
-private:
-    void MainMenuBar();
-    SimulationsHandler& simHandler;
-    Settings& settings = Settings::GetInstance();
-};
+    private:
+        void MainMenuBar();
+        EsdEngineSimulations::SimulationsHandler& simHandler;
+        EsdEngineUtils::Settings& settings = EsdEngineUtils::Settings::GetInstance();
+    };
+}
+

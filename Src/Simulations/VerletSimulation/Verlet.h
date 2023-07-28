@@ -11,6 +11,8 @@
 #include "VerletUtils.h"
 #include "Simulations/SimulationBase.h"
 
+using namespace EsdEngineUtils;
+
 struct VerletObject
 {
     Vector2<float> position;
@@ -220,7 +222,7 @@ public:
     }
 };
 
-class VerletSimulationManager : public SimulationBase{
+class VerletSimulationManager : public EsdEngineSimulations::SimulationBase{
 private:
     Settings& settings = Settings::GetInstance();
     Solver solver;

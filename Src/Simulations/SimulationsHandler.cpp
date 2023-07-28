@@ -1,36 +1,39 @@
 #include "SimulationsHandler.h"
 
-void SimulationsHandler::SetCurrentSimulation(int index)
-{
-    currentSimulation = simulations[index];
-}
-
-void SimulationsHandler::Initialize()
-{
-    if (currentSimulation)
+namespace EsdEngineSimulations {
+    void SimulationsHandler::SetCurrentSimulation(int index)
     {
-        currentSimulation->Initialize();
+        currentSimulation = simulations[index];
     }
-}
 
-void SimulationsHandler::Update(){
-    if (currentSimulation)
+    void SimulationsHandler::Initialize()
     {
-        currentSimulation->Update();
+        if (currentSimulation)
+        {
+            currentSimulation->Initialize();
+        }
     }
-}
 
-void SimulationsHandler::Render(){
-    if (currentSimulation)
-    {
-        currentSimulation->Render();
+    void SimulationsHandler::Update(){
+        if (currentSimulation)
+        {
+            currentSimulation->Update();
+        }
     }
-}
 
-void SimulationsHandler::RenderUI()
-{
-    if (currentSimulation)
-    {
-        currentSimulation->RenderUI();
+    void SimulationsHandler::Render(){
+        if (currentSimulation)
+        {
+            currentSimulation->Render();
+        }
     }
+
+    void SimulationsHandler::RenderUI()
+    {
+        if (currentSimulation)
+        {
+            currentSimulation->RenderUI();
+        }
+    }
+
 }
