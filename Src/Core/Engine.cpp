@@ -12,8 +12,6 @@ namespace EsdEngineCore {
      * 3. Simulations handler
      * 4. Event handler
      * 5. User interface
-     *
-     * The order of cleanup is the reverse of the order of initialization.
      */
     Engine::Engine() {
         std::cout << "Initializing window" << std::endl;
@@ -33,6 +31,8 @@ namespace EsdEngineCore {
 
         std::cout << "Initializing user interface" << std::endl;
         ui = std::make_unique<EsdEngineGraphics::UI>(*simHandler);
+
+        std::cout << "Engine initialization complete" << std::endl;
     }
 
     /**
@@ -43,17 +43,19 @@ namespace EsdEngineCore {
      * 4. Event handler
      */
     Engine::~Engine() {
+        std::cout << "Cleaning up event handler" << std::endl;
+        eventHandler->Cleanup();
+
+        std::cout << "Cleaning up simulations handler" << std::endl;
+        simHandler->Cleanup();
+
         std::cout << "Cleaning up renderer" << std::endl;
         renderer->Cleanup();
 
         std::cout << "Cleaning up window" << std::endl;
         window->Cleanup();
 
-        std::cout << "Cleaning up simulations handler" << std::endl;
-        simHandler->Cleanup();
-
-        std::cout << "Cleaning up event handler" << std::endl;
-        eventHandler->Cleanup();
+        std::cout << "Engine cleanup complete" << std::endl;
     }
 
     /**
