@@ -55,6 +55,7 @@ void UI::Render()
 
         auto& simSettings = Settings::GetInstance().GetSimulations();
         ImGui::SliderFloat("FPS", &simSettings.fps, 1.0f, 120.0f);
+        std::cout << simSettings.fps << std::endl;
 
         ImGui::Separator();
 
@@ -63,8 +64,6 @@ void UI::Render()
         ImGui::Separator();
 
         ImGui::BeginChild("Simulation Settings", ImVec2(0, 0), true);
-        ImGui::Text("Simulation Settings");
-        ImGui::Separator();
         SimulationsHandler::GetInstance().RenderUI();
         ImGui::EndChild();
 

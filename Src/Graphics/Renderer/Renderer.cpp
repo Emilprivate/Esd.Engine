@@ -94,10 +94,10 @@ void Renderer::Run()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    if (!Settings::GetInstance().GetSimulations().init_new_sim)
+    if (Settings::GetInstance().GetSimulations().init_new_sim)
     {
         SimulationsHandler::GetInstance().Initialize();
-        Settings::GetInstance().GetSimulations().init_new_sim = true;
+        Settings::GetInstance().GetSimulations().init_new_sim = false;
     }
 
     SimulationsHandler::GetInstance().Run();

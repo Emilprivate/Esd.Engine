@@ -1,9 +1,11 @@
 #include "EngineCore.h"
 
+// TODO: FPS is not working properly
+
 Uint32 EngineCore::CalculateFrameDelay()
 {
     auto& settings = Settings::GetInstance().GetSimulations();
-    return 1000 / settings.fps;
+    return 1000.0f / settings.fps;
 }
 
 void EngineCore::EngineLoop()
